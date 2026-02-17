@@ -1,4 +1,4 @@
-# AI Governance MCP Server
+# AI Governance MCP
 
 <p align="center">
   <img src="clawd.svg" alt="Gov'd — AI Governance MCP mascot" width="200" />
