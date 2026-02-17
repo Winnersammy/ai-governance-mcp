@@ -1,0 +1,23 @@
+{
+  "name": "ai-governance-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI governance laws, regulations, and frameworks",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "ai-governance-mcp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/client.js"
+  },
+  "keywords": ["mcp", "ai-governance", "regulations", "eu-ai-act"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "node-html-parser": "^7.0.2",
+    "rss-parser": "^3.13.0"
+  }
+}
