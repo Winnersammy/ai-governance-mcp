@@ -6,6 +6,18 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 **GitHub:** `https://github.com/Samrajtheailyceum/ai-governance-mcp`
 
+### Deploy Your Own (one click)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Samrajtheailyceum/ai-governance-mcp)
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/new?repo=https://github.com/Samrajtheailyceum/ai-governance-mcp)
+
+After deploying, your server URL will be something like:
+```
+https://your-app-name.onrender.com/sse
+```
+Use that URL as your MCP server endpoint on any platform.
+
 ---
 
 ## One-Click Install: Copy a Prompt Into Your AI Tool

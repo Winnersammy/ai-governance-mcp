@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ai-governance-mcp
+    runtime: node
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
