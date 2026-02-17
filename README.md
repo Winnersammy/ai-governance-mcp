@@ -4,9 +4,137 @@ A Model Context Protocol (MCP) server that gives any AI assistant real-time acce
 
 Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any MCP-compatible client. Runs locally (stdio) or as a hosted server (HTTP/SSE).
 
+**GitHub:** `https://github.com/Winnersammy/ai-governance-mcp`
+
 ---
 
-## Add This MCP Server
+## One-Click Install: Copy a Prompt Into Your AI Tool
+
+Don't want to configure anything manually? Just **copy the prompt for your platform below** and paste it into your AI assistant. It will handle the installation for you.
+
+### For Claude Code (CLI)
+
+> Paste this into Claude Code:
+
+```
+Install the AI Governance MCP server from https://github.com/Winnersammy/ai-governance-mcp for me.
+
+Steps:
+1. Clone the repo: git clone https://github.com/Winnersammy/ai-governance-mcp.git ~/ai-governance-mcp
+2. Run: cd ~/ai-governance-mcp && npm install
+3. Add the MCP server: claude mcp add ai-governance node ~/ai-governance-mcp/src/index.js
+4. Confirm it's added by running: claude mcp list
+```
+
+### For Cursor (with AI chat)
+
+> Paste this into Cursor's AI chat:
+
+```
+Help me install the AI Governance MCP server. Here's what to do:
+
+1. Open a terminal and run:
+   git clone https://github.com/Winnersammy/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then add this to my MCP config file (.cursor/mcp.json):
+   {
+     "mcpServers": {
+       "ai-governance": {
+         "command": "node",
+         "args": ["~/ai-governance-mcp/src/index.js"]
+       }
+     }
+   }
+
+3. Tell me to restart Cursor to activate it.
+```
+
+### For Windsurf (with AI chat)
+
+> Paste this into Windsurf's AI chat:
+
+```
+Help me install the AI Governance MCP server. Here's what to do:
+
+1. Open a terminal and run:
+   git clone https://github.com/Winnersammy/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then add this to my Windsurf MCP config (~/.codeium/windsurf/mcp_config.json):
+   {
+     "mcpServers": {
+       "ai-governance": {
+         "command": "node",
+         "args": ["~/ai-governance-mcp/src/index.js"]
+       }
+     }
+   }
+
+3. Tell me to restart Windsurf to activate it.
+```
+
+### For ChatGPT / OpenAI (needs hosted server)
+
+> Paste this into ChatGPT or any OpenAI-powered tool:
+
+```
+I want to connect to the AI Governance MCP server.
+
+The server repo is at: https://github.com/Winnersammy/ai-governance-mcp
+
+To use it with OpenAI, I need to:
+1. Clone and install: git clone https://github.com/Winnersammy/ai-governance-mcp.git && cd ai-governance-mcp && npm install
+2. Start in HTTP/SSE mode: npm run start:sse
+3. The server will be available at: http://localhost:3100/sse
+4. For production, deploy to Railway/Render and use the public URL as the MCP endpoint.
+
+Help me set this up step by step.
+```
+
+### For Claude Desktop (manual config)
+
+> Paste this into Claude Desktop or Claude Code to get help setting it up:
+
+```
+Help me add the AI Governance MCP server to my Claude Desktop config.
+
+1. First clone and install:
+   git clone https://github.com/Winnersammy/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then edit my claude_desktop_config.json and add this to the mcpServers section:
+   "ai-governance": {
+     "command": "node",
+     "args": ["/Users/YOUR_USERNAME/ai-governance-mcp/src/index.js"]
+   }
+
+Config location:
+- macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+- Windows: %APPDATA%\Claude\claude_desktop_config.json
+
+3. Remind me to restart Claude Desktop after.
+```
+
+### For Any Other MCP-Compatible Platform
+
+> Generic prompt you can paste into any AI assistant:
+
+```
+I want to install the AI Governance MCP server from https://github.com/Winnersammy/ai-governance-mcp
+
+It's a standard MCP server that runs over stdio (default) or HTTP/SSE (with PORT env var).
+
+Please help me:
+1. Clone the repo and run npm install
+2. Configure it for whatever MCP client/platform I'm using
+3. The entry point is src/index.js
+4. For HTTP/SSE mode, run with PORT=3100 and connect to http://localhost:3100/sse
+```
+
+---
+
+## Manual Setup
 
 ### Option A: Local (stdio) — Claude Desktop, Claude Code, Cursor, Windsurf
 
@@ -16,7 +144,7 @@ cd ai-governance-mcp
 npm install
 ```
 
-Then add to your platform's config (see [Platform Setup](#platform-setup) below).
+Then add to your platform's config (see [Platform Config Reference](#platform-config-reference) below).
 
 ### Option B: Remote (HTTP/SSE) — OpenAI, ChatGPT, platform connectors, team use
 
@@ -38,7 +166,7 @@ Deploy to any hosting provider (Railway, Render, Fly.io, etc.) and use that URL 
 
 ---
 
-## Platform Setup
+## Platform Config Reference
 
 ### Claude Desktop
 
@@ -99,14 +227,14 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 ### OpenAI / ChatGPT / Assistants API
 
-OpenAI requires a remote URL. Start the server in HTTP/SSE mode:
+Start the server in HTTP/SSE mode:
 
 ```bash
 npm run start:sse
 # or: PORT=3100 node src/index.js
 ```
 
-Then use this as your MCP server endpoint:
+MCP server endpoint:
 ```
 http://localhost:3100/sse
 ```
@@ -119,7 +247,6 @@ For production, deploy the server and use the deployed URL.
 ```bash
 node /absolute/path/to/ai-governance-mcp/src/index.js
 ```
-Communicate over stdin/stdout using the MCP JSON-RPC protocol.
 
 **HTTP/SSE mode**:
 ```bash
