@@ -19,6 +19,7 @@ import {
 } from "./fetcher.js";
 import { SOURCES } from "./sources.js";
 
+function createServer() {
 const server = new McpServer({
   name: "ai-governance-mcp",
   version: "1.0.0",
@@ -419,6 +420,9 @@ This topic spans multiple AI governance frameworks. Here's what each major frame
   }
 );
 
+return server;
+}
+
 // ─── Start server ───────────────────────────────────────────────
 const port = process.env.PORT || process.argv.find((a) => a.startsWith("--port="))?.split("=")[1];
 
@@ -439,9 +443,14 @@ if (port) {
   const transports = {};
 
   app.get("/sse", async (req, res) => {
+    // Create a new server instance per connection (MCP SDK requirement)
+    const server = createServer();
     const transport = new SSEServerTransport("/messages", res);
     transports[transport.sessionId] = transport;
-    res.on("close", () => delete transports[transport.sessionId]);
+    res.on("close", () => {
+      delete transports[transport.sessionId];
+      server.close().catch(() => {});
+    });
     await server.connect(transport);
   });
 
@@ -462,6 +471,7 @@ if (port) {
   });
 } else {
   // stdio mode — for Claude Desktop, Claude Code, Cursor, Windsurf, etc.
+  const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("AI Governance MCP Server running on stdio");

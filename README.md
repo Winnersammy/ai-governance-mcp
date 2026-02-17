@@ -11,10 +11,10 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 Connect any MCP-compatible client to the live public server:
 
 ```
-https://ai-governance-mcp.loca.lt/sse
+https://billing-connecting-aquatic-performs.trycloudflare.com/sse
 ```
 
-Health check: `https://ai-governance-mcp.loca.lt/health`
+Health check: `https://billing-connecting-aquatic-performs.trycloudflare.com/health`
 
 ### Deploy Your Own (one click)
 
@@ -158,33 +158,96 @@ Please help me:
 
 ## Manual Setup
 
-### Option A: Local (stdio) — Claude Desktop, Claude Code, Cursor, Windsurf
+### Prerequisites
+
+- **Node.js 18+** (check with `node --version`)
+- **npm** (comes with Node)
+- **git** (to clone the repo)
+
+### Step 1: Clone and Install
 
 ```bash
 git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git
 cd ai-governance-mcp
 npm install
+```
+
+### Step 2: Verify It Works
+
+```bash
+# Run the test suite (hits live APIs — needs internet)
+npm test
+
+# Quick health check in HTTP mode
+PORT=3100 node src/index.js &
+curl http://localhost:3100/health
+# Should return: {"status":"ok","server":"ai-governance-mcp","version":"1.0.0"}
+kill %1
+```
+
+### Step 3: Choose Your Mode
+
+**Option A: Local (stdio)** — for Claude Desktop, Claude Code, Cursor, Windsurf
+
+```bash
+npm start
+# Server runs on stdin/stdout — connect via your platform's MCP config
 ```
 
 Then add to your platform's config (see [Platform Config Reference](#platform-config-reference) below).
 
-### Option B: Remote (HTTP/SSE) — OpenAI, ChatGPT, platform connectors, team use
+**Option B: Remote (HTTP/SSE)** — for OpenAI, ChatGPT, platform connectors, team use
 
 ```bash
-git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git
-cd ai-governance-mcp
-npm install
 npm run start:sse
+# Server runs on http://localhost:3100
 ```
 
-Server URL (local):
-```
-http://localhost:3100/sse
-```
-
+Server URL: `http://localhost:3100/sse`
 Health check: `http://localhost:3100/health`
 
+**Option C: Docker**
+
+```bash
+docker build -t ai-governance-mcp .
+docker run -p 3100:3100 ai-governance-mcp
+```
+
+Server URL: `http://localhost:3100/sse`
+
 Deploy to any hosting provider (Railway, Render, Fly.io, etc.) and use that URL instead.
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | *(none)* | Set to enable HTTP/SSE mode (e.g. `3100`). When unset, server runs in stdio mode. |
+| `NODE_ENV` | `development` | Set to `production` for deployed instances. |
+
+**Examples:**
+
+```bash
+# stdio mode (default — no PORT set)
+node src/index.js
+
+# HTTP/SSE mode on port 3100
+PORT=3100 node src/index.js
+
+# Custom port
+PORT=8080 node src/index.js
+```
+
+---
+
+## npm Scripts
+
+| Script | Command | What It Does |
+|--------|---------|-------------|
+| `npm start` | `node src/index.js` | Start in stdio mode (for MCP clients) |
+| `npm run start:sse` | `PORT=3100 node src/index.js` | Start in HTTP/SSE mode on port 3100 |
+| `npm test` | `node test/client.js` | Run the full test suite against live APIs |
 
 ---
 
@@ -314,28 +377,188 @@ Once connected to any AI assistant, you can ask:
 ## Testing
 
 ```bash
+# Full test suite — tests all 8 tools against live APIs
 npm test
 ```
+
+The test suite checks:
+1. Source configuration (key docs, RSS feeds, regions)
+2. Key document retrieval (EU, US, Global)
+3. Federal Register API search
+4. EUR-Lex search
+5. RSS feed aggregation
+6. Global combined search (all sources)
+7. Document content fetching (scrapes a live URL)
+
+Tests require internet access. Some may show warnings if external APIs are temporarily unavailable — this is normal, the server has built-in fallbacks.
+
+---
 
 ## Architecture
 
 ```
-src/
-├── index.js      — MCP server (stdio + HTTP/SSE) with 8 tool definitions
-├── fetcher.js    — Data fetching (EUR-Lex, Fed Register, RSS, scraping)
-└── sources.js    — Source configuration (URLs, key docs, feeds)
-
-test/
-└── client.js     — End-to-end test suite
+ai-governance-mcp/
+├── src/
+│   ├── index.js      — MCP server (stdio + HTTP/SSE), all 8 tool definitions
+│   ├── fetcher.js    — Data fetching (EUR-Lex, Fed Register, RSS, web scraping)
+│   └── sources.js    — Source config (API URLs, key documents, RSS feeds)
+├── test/
+│   └── client.js     — End-to-end test suite
+├── Dockerfile         — Docker deployment config
+├── render.yaml        — Render.com one-click deploy config
+└── package.json       — Dependencies and scripts
 ```
 
-## Caching
+### How It Works
 
-All API responses are cached in-memory for 30 minutes to avoid rate limiting and improve response speed.
+1. **Client connects** via stdio (local) or SSE (remote)
+2. **Client calls a tool** (e.g. `search_ai_governance` with query "AI liability")
+3. **Server fetches data** from EUR-Lex, Federal Register, GovInfo, or RSS feeds
+4. **Results are cached** in-memory for 30 minutes (avoids rate limits, speeds up repeat queries)
+5. **Server returns** formatted markdown results to the client
+
+### Caching
+
+All API responses are cached in-memory for 30 minutes. The cache is per-process — restarting the server clears the cache. No external cache (Redis, etc.) is needed.
+
+---
 
 ## Adding New Sources
 
-Edit `src/sources.js` to add new data sources, then add corresponding fetch logic in `src/fetcher.js`.
+1. **Add the source config** in `src/sources.js`:
+
+```javascript
+// In SOURCES object
+myNewSource: {
+  name: "My Source Name",
+  region: "EU",           // or "US", "Global"
+  baseUrl: "https://api.example.com",
+  rssFeeds: [
+    { label: "My Feed", url: "https://example.com/feed.xml" }
+  ],
+  keyDocs: [
+    {
+      id: "doc-1",
+      title: "Important Document",
+      url: "https://example.com/doc",
+      date: "2024-01-01",
+      status: "Active",
+      type: "Regulation"
+    }
+  ]
+}
+```
+
+2. **Add fetch logic** in `src/fetcher.js`:
+
+```javascript
+export async function searchMySource(query, maxResults = 10) {
+  const cacheKey = `mysource:${query}:${maxResults}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  // Fetch from API, parse results, return array of { title, url, date, summary, source, region }
+
+  setCached(cacheKey, results);
+  return results;
+}
+```
+
+3. **Wire it into `globalSearch`** in `src/fetcher.js` to include in combined search results.
+
+4. **Optionally add a dedicated tool** in `src/index.js` using `server.tool(...)`.
+
+---
+
+## Troubleshooting
+
+### "Cannot find module" or npm install fails
+
+```bash
+# Make sure you're in the project directory
+cd ai-governance-mcp
+
+# Clear and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Server starts but tools return empty results
+
+The server fetches live data from external APIs (EUR-Lex, Federal Register, etc.). Check:
+- You have internet access
+- The APIs aren't temporarily down (the server has fallback caches for key documents)
+- Run `npm test` to see which sources are responding
+
+### Claude Desktop doesn't show the MCP tools
+
+1. Make sure the **absolute path** in `claude_desktop_config.json` is correct (no `~` — use full path)
+2. **Restart Claude Desktop** after editing the config
+3. Check the path works: `node /your/absolute/path/to/ai-governance-mcp/src/index.js` — should print "AI Governance MCP Server running on stdio" to stderr
+
+### Port already in use (HTTP/SSE mode)
+
+```bash
+# Find what's using the port
+lsof -i :3100
+
+# Kill it
+kill -9 <PID>
+
+# Or use a different port
+PORT=3200 node src/index.js
+```
+
+### CORS errors when connecting from a browser-based client
+
+The server includes CORS headers that allow all origins (`*`). If you're behind a reverse proxy, make sure the proxy forwards the CORS headers.
+
+### Docker build fails
+
+```bash
+# Make sure Docker is running, then:
+docker build --no-cache -t ai-governance-mcp .
+```
+
+---
+
+## Contributing
+
+Contributions welcome! Here's how:
+
+1. **Fork** the repo
+2. **Create a branch** (`git checkout -b feature/my-new-source`)
+3. **Make your changes** — add sources in `sources.js`, fetch logic in `fetcher.js`, tools in `index.js`
+4. **Test** (`npm test`)
+5. **Open a PR** with a clear description of what you added
+
+**Ideas for contributions:**
+- New data sources (UK, China, Canada, Brazil, Singapore AI regulations)
+- Additional comparison topics in `compare_ai_governance_frameworks`
+- Structured data extraction (JSON output for specific regulations)
+- Webhook/notification support for new regulation alerts
+- Authentication support for premium data APIs
+
+---
+
+## Frequently Asked Questions
+
+**Q: Does this cost anything?**
+A: No. The server is free and open source. All data sources (EUR-Lex, Federal Register, OECD, RSS feeds) are free public APIs.
+
+**Q: How current is the data?**
+A: Live. Every query hits the actual APIs in real-time (with 30-minute caching). RSS feeds pull the latest published items. Key documents are updated in source code as new landmark regulations are published.
+
+**Q: Can I use this commercially?**
+A: Yes. MIT license. The data comes from public government sources.
+
+**Q: Does it work offline?**
+A: Partially. Key documents (EU AI Act, NIST RMF, etc.) are cached in source code and always available. Live search and RSS feeds require internet.
+
+**Q: How do I add my own country's regulations?**
+A: See [Adding New Sources](#adding-new-sources) above. Add the API/RSS config to `sources.js` and the fetch logic to `fetcher.js`.
+
+---
 
 ## License
 
