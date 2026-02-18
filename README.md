@@ -4,11 +4,37 @@
   <img src="clawd.svg" alt="Gov'd — AI Governance MCP mascot" width="200" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp"><img src="https://img.shields.io/badge/AI%20Governance-MCP-0A2540?style=for-the-badge&logo=openai&logoColor=white" alt="AI Governance MCP" /></a>
+  <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/Version-2.0.0-1f6feb?style=for-the-badge" alt="Version 2.0.0" /></a>
+  <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-2ea043?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp"><img src="https://img.shields.io/badge/Transport-STDIO%20%7C%20SSE-8250df?style=for-the-badge" alt="Transport" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white" alt="OpenAI" />
+  <img src="https://img.shields.io/badge/Claude-D97757?style=flat-square&logo=anthropic&logoColor=white" alt="Claude" />
+  <img src="https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=githubcopilot&logoColor=white" alt="Copilot" />
+  <img src="https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white" alt="Cursor" />
+  <img src="https://img.shields.io/badge/Windsurf-0EA5E9?style=flat-square&logo=codeium&logoColor=white" alt="Windsurf" />
+</p>
+
 A Model Context Protocol (MCP) server that gives any AI assistant real-time access to AI governance laws, regulations, and policy frameworks from around the world.
 
 Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any MCP-compatible client. Runs locally (stdio) or as a hosted server (HTTP/SSE).
 
 **GitHub:** `https://github.com/Samrajtheailyceum/ai-governance-mcp`
+
+## Quick Navigation
+
+- [Hosted Server](#use-the-hosted-server-no-setup-needed)
+- [Deploy Your Own](#deploy-your-own-one-click)
+- [AI Platform Support (with logos)](#ai-platform-support-with-logos)
+- [Manual Setup](#manual-setup)
+- [Available Tools](#available-tools)
+- [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix-restored--expanded)
+- [Feedback loop](#feedback-loop)
 
 ### Use the Hosted Server (no setup needed)
 
@@ -33,6 +59,49 @@ https://your-app-name.onrender.com/sse
 Use that URL as your MCP server endpoint on any platform.
 
 ---
+
+## Questions / AI Governance Consulting
+
+For any questions or tailored AI governance support, email **hello@theailyceum.com** or visit **https://theailyceum.com**.
+
+
+## Repository Quality & Governance
+
+## Maintainer GitHub Update Workflow
+
+For maintainers publishing updates to GitHub:
+
+```bash
+git add .
+git commit -m "Describe your change"
+git push origin <branch>
+```
+
+If you use this repo with automated agents, ensure each change includes:
+- updated docs (when behavior changes),
+- test evidence (`npm test`, `npm run test:terminal`),
+- a clear PR summary of motivation + implementation + validation.
+
+This repository includes:
+- **Contributor workflow:** see [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Version history:** see [`CHANGELOG.md`](CHANGELOG.md)
+- **Operational smoke check:** `npm run test:terminal`
+
+Design goals for this MCP:
+1. High-signal governance answers with source links and jurisdiction context
+2. Graceful fallback behavior when live endpoints are blocked/rate-limited
+3. Practical implementation guidance (not just policy summaries)
+
+## AI Platform Support (with logos)
+
+| Platform | Logo | Typical MCP Mode | Notes |
+|----------|------|------------------|-------|
+| ChatGPT / OpenAI | ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white) | HTTP/SSE | Use hosted endpoint or `npm run start:sse`. |
+| Claude (Desktop / Code) | ![Claude](https://img.shields.io/badge/Claude-D97757?style=flat-square&logo=anthropic&logoColor=white) | stdio or HTTP/SSE | Great for local stdio integration. |
+| Gemini | ![Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white) | HTTP/SSE | Use the public `/sse` URL for remote connectors. |
+| GitHub Copilot | ![Copilot](https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=githubcopilot&logoColor=white) | HTTP/SSE | Connect as remote MCP endpoint. |
+| Cursor | ![Cursor](https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white) | stdio | Configure `.cursor/mcp.json`. |
+| Windsurf | ![Windsurf](https://img.shields.io/badge/Windsurf-0EA5E9?style=flat-square&logo=codeium&logoColor=white) | stdio | Configure `mcp_config.json`. |
 
 ## One-Click Install: Copy a Prompt Into Your AI Tool
 
@@ -185,9 +254,34 @@ npm test
 # Quick health check in HTTP mode
 PORT=3100 node src/index.js &
 curl http://localhost:3100/health
-# Should return: {"status":"ok","server":"ai-governance-mcp","version":"1.0.0"}
+# Should return: {"status":"ok","server":"ai-governance-mcp","version":"2.0.0"}
 kill %1
+
+# One-command terminal smoke test (starts server, checks /health, validates version)
+npm run test:terminal
 ```
+
+### OpenAI / ChatGPT Terminal Test Flow
+
+If you are testing from an OpenAI-compatible terminal workflow, use this minimal sequence:
+
+```bash
+# 1) Install + baseline tests
+npm install
+npm test
+
+# 2) Start server in SSE mode for MCP clients
+npm run start:sse
+# endpoint: http://localhost:3100/sse
+# health:   http://localhost:3100/health
+```
+
+Then in your MCP client, run prompts like:
+- `search_ai_governance` with `query="foundation model transparency requirements"`
+- `get_latest_ai_governance_updates` with `region="all"`
+- `get_applied_ai_governance_frameworks` with `use_case="AI hiring assistant for EU market"`
+
+If live sources are blocked/rate-limited, the server now returns a limits-aware response with trusted generic regulatory URLs so users still get actionable resources.
 
 ### Step 3: Choose Your Mode
 
@@ -252,6 +346,7 @@ PORT=8080 node src/index.js
 | `npm start` | `node src/index.js` | Start in stdio mode (for MCP clients) |
 | `npm run start:sse` | `PORT=3100 node src/index.js` | Start in HTTP/SSE mode on port 3100 |
 | `npm test` | `node test/client.js` | Run the full test suite against live APIs |
+| `npm run test:terminal` | `bash scripts/terminal-smoke.sh` | Start server and validate `/health` + `version` in one command |
 
 ---
 
@@ -349,23 +444,45 @@ Connect to `http://localhost:3100/sse` using the MCP SSE transport.
 
 | Tool | Description |
 |------|-------------|
-| `search_ai_governance` | Full-text search across all databases |
-| `get_latest_ai_governance_updates` | Latest updates from RSS feeds |
+| `search_ai_governance` | Full-text search across all databases, with `focus` support for sustainability |
+| `get_latest_ai_governance_updates` | Latest updates from RSS feeds, with automatic non-RSS fallback |
+| `get_sustainability_ai_regulatory_briefing` | Sustainability-focused AI and disclosure regulation briefing |
+| `get_applied_ai_governance_frameworks` | Applies real frameworks to a use case with context, implementation checklist, and links |
 | `get_key_ai_governance_documents` | Curated list of landmark documents |
 | `get_eu_ai_act_info` | EU AI Act deep dive with topic search |
 | `get_us_ai_policy` | US policy landscape with Federal Register search |
 | `get_global_ai_frameworks` | OECD, G7, UN, UNESCO, Bletchley and more |
 | `fetch_governance_document` | Fetch and extract text from any document URL |
 | `compare_ai_governance_frameworks` | Side-by-side comparison on a specific topic |
+| `submit_mcp_feedback` | Capture structured user feedback (rating + message) for maintainers; logs to `logs/mcp-feedback.jsonl` |
+
+Most user-facing tools now include a **Response Protocol (Professional)** preface so downstream LLMs use the retrieved context correctly and state assumptions/uncertainty explicitly.
+
+If live sources are unavailable or a question is out-of-scope for current retrievable data, the MCP now returns a clear **limitations notice** plus trusted **generic resource URLs** (OECD, EUR-Lex, Federal Register, NIST, UNESCO, IFRS) so users still get actionable next steps.
 
 ## Data Sources
 
 | Region | Source | What's Covered |
 |--------|--------|----------------|
-| EU | EUR-Lex API + RSS | EU AI Act, GDPR, AI regulations |
-| US | Federal Register API, GovInfo | Executive orders, federal agency rules, AI bills |
-| Global | OECD, G7, UNESCO, UN | International frameworks and principles |
-| News | Stanford HAI, AI Now, FLI | Research & policy news |
+| EU | EUR-Lex API + RSS | EU AI Act, GDPR, CSRD, CSDDD, AI regulations |
+| US | Federal Register API, GovInfo | Executive orders, federal agency rules, AI bills, climate disclosure activity |
+| Global | OECD, G7, UNESCO, UN, ISSB | International frameworks and principles |
+| News | Stanford HAI, AI Now, FLI, ESG Today | Research, policy, and sustainability news |
+
+## Core Regulatory Reference Matrix (restored + expanded)
+
+| Reference | Region | Why it matters | Link |
+|-----------|--------|----------------|------|
+| EU AI Act (2024/1689) | EU | Binding AI risk obligations, GPAI duties, penalties | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689 |
+| GDPR | EU | Data protection/legal basis controls for AI systems | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679 |
+| CSRD | EU | Sustainability reporting obligations and governance evidence expectations | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2464 |
+| CSDDD | EU | Supply-chain due diligence duties relevant to AI-enabled operations | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1760 |
+| EO 14179 (2025) | US | Current federal executive direction for AI policy | https://www.federalregister.gov/documents/2025/01/23/2025-01953/removing-barriers-to-american-leadership-in-artificial-intelligence |
+| NIST AI RMF 1.0 | US | Practical governance lifecycle (Govern, Map, Measure, Manage) | https://airc.nist.gov/RMF |
+| SEC Climate Rule | US | Climate-related disclosure governance and controls context | https://www.sec.gov/rules-regulations/2024/03/enhancement-standardization-climate-related-disclosures-investors |
+| OECD AI Principles | Global | International baseline principles adopted across countries | https://oecd.ai/en/ai-principles |
+| UNESCO AI Ethics Recommendation | Global | Human-rights and ethics guardrails for AI policy and deployment | https://unesdoc.unesco.org/ark:/48223/pf0000381137 |
+| ISSB IFRS S1/S2 | Global | Sustainability disclosure standards used in cross-border governance | https://www.ifrs.org/issued-standards/ifrs-sustainability-standards-navigator/ |
 
 ## Example Prompts
 
@@ -378,10 +495,15 @@ Once connected to any AI assistant, you can ask:
 - *"Fetch the NIST AI Risk Management Framework"*
 - *"What US executive orders on AI are currently active?"*
 
+## Feedback loop
+
+The MCP can collect user feedback through `submit_mcp_feedback` (rating + context + message).
+This helps maintainers improve future versions, but does **not** auto-train the model in real-time.
+
 ## Testing
 
 ```bash
-# Full test suite — tests all 8 tools against live APIs
+# Full test suite — tests v2.0 data fetchers against live APIs
 npm test
 ```
 
@@ -393,6 +515,9 @@ The test suite checks:
 5. RSS feed aggregation
 6. Global combined search (all sources)
 7. Document content fetching (scrapes a live URL)
+8. Global framework ranking and retrieval quality
+9. A 20-prompt reliability sweep across sustainability + AI governance topics
+10. Applied framework guidance includes context, implementation steps, and resource links
 
 Tests require internet access. Some may show warnings if external APIs are temporarily unavailable — this is normal, the server has built-in fallbacks.
 
@@ -403,7 +528,7 @@ Tests require internet access. Some may show warnings if external APIs are tempo
 ```
 ai-governance-mcp/
 ├── src/
-│   ├── index.js      — MCP server (stdio + HTTP/SSE), all 8 tool definitions
+│   ├── index.js      — MCP server (stdio + HTTP/SSE), all v2.0 tool definitions
 │   ├── fetcher.js    — Data fetching (EUR-Lex, Fed Register, RSS, web scraping)
 │   └── sources.js    — Source config (API URLs, key documents, RSS feeds)
 ├── test/

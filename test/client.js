@@ -1,6 +1,6 @@
 /**
  * AI Governance MCP — Test Client
- * Tests all 8 tools by calling them directly via the fetcher module
+ * Tests v2.0 fetchers and data providers by calling fetcher functions directly
  */
 
 import {
@@ -10,8 +10,11 @@ import {
   fetchRSSUpdates,
   getKeyDocuments,
   fetchDocumentContent,
+  getSustainabilityGovernanceBriefing,
+  searchGlobalFrameworks,
+  getAppliedFrameworkGuidance,
 } from "../src/fetcher.js";
-import { SOURCES, ALL_RSS_FEEDS, ALL_KEY_DOCS } from "../src/sources.js";
+import { SOURCES, ALL_RSS_FEEDS, ALL_KEY_DOCS, GENERIC_RESOURCE_URLS } from "../src/sources.js";
 
 const results = { passed: 0, failed: 0, errors: [] };
 
@@ -43,6 +46,8 @@ await test("Sources configuration", async () => {
   pass(`${ALL_RSS_FEEDS.length} RSS feeds configured`);
   const regions = [SOURCES.eurlex, SOURCES.govinfo, SOURCES.oecd, SOURCES.news];
   pass(`${regions.length} source regions defined`);
+  if (GENERIC_RESOURCE_URLS.length < 5) throw new Error("Expected >= 5 generic resource URLs");
+  pass(`Generic fallback resources configured: ${GENERIC_RESOURCE_URLS.length}`);
 });
 
 // ── Test 2: Key documents retrieval ──────────────────────────
@@ -123,6 +128,88 @@ await test("Document content fetch", async () => {
     pass(`Content length: ${doc.content.length} chars`);
     pass(`Title: "${doc.title?.slice(0, 60)}"`);
   }
+});
+
+// ── Test 8: Sustainability briefing ──────────────────────────
+await test("Sustainability governance briefing", async () => {
+  const briefing = await getSustainabilityGovernanceBriefing("all", 10);
+  if (!briefing || !briefing.generatedAt) throw new Error("Missing briefing metadata");
+  if (!Array.isArray(briefing.updates)) throw new Error("Updates should be an array");
+  if (!Array.isArray(briefing.keyDocuments)) throw new Error("Key documents should be an array");
+  pass(`Briefing updates: ${briefing.updates.length}`);
+  pass(`Briefing key docs: ${briefing.keyDocuments.length}`);
+});
+
+// ── Test 9: Global frameworks search and ranking ──────────────
+await test("Global frameworks search", async () => {
+  const results = searchGlobalFrameworks("sustainability disclosure AI standards", 8);
+  if (!Array.isArray(results)) throw new Error("Expected array");
+  if (results.length === 0) throw new Error("Expected at least one ranked framework result");
+  pass(`Global frameworks ranked results: ${results.length}`);
+  pass(`Top result: ${results[0].title}`);
+});
+
+// ── Test 10: 20-prompt reliability sweep ──────────────────────
+await test("20 prompt reliability sweep", async () => {
+  const prompts = [
+    "AI Act enforcement timeline",
+    "foundation model transparency obligations",
+    "GPAI incident reporting",
+    "NIST AI RMF governance",
+    "federal register AI notice",
+    "EU prohibited AI practices",
+    "high-risk AI conformity assessment",
+    "algorithmic accountability US",
+    "OECD AI principles",
+    "UNESCO AI ethics",
+    "G7 Hiroshima code",
+    "AI and climate disclosure requirements",
+    "sustainability reporting and AI",
+    "CSRD digital reporting",
+    "CSDDD due diligence AI supply chain",
+    "SEC climate disclosure litigation",
+    "ISSB IFRS S2 climate standard",
+    "energy efficient AI governance",
+    "greenwashing AI claims regulation",
+    "cross-border AI sustainability compliance",
+  ];
+
+  let resolved = 0;
+  for (const prompt of prompts) {
+    const results = await globalSearch(prompt, { maxResults: 6, regions: ["EU", "US", "Global"] });
+    if (Array.isArray(results) && results.length > 0) resolved += 1;
+  }
+
+  if (resolved < 20) throw new Error(`Expected all 20 prompts to return results, resolved=${resolved}`);
+  pass(`Resolved prompts: ${resolved}/20`);
+});
+
+// ── Test 11: Applied frameworks with context/resources ─────────
+await test("Applied framework guidance", async () => {
+  const applied = getAppliedFrameworkGuidance("foundation model for climate risk disclosure", "all", 4);
+  if (!Array.isArray(applied) || applied.length === 0) throw new Error("Expected applied frameworks");
+  const first = applied[0];
+  if (!first.whyItApplies) throw new Error("Missing whyItApplies context");
+  if (!first.url) throw new Error("Missing resource link");
+  if (!Array.isArray(first.implementationSteps) || first.implementationSteps.length < 2) {
+    throw new Error("Missing implementation steps");
+  }
+  pass(`Applied frameworks returned: ${applied.length}`);
+  pass(`First applied framework has context + link: ${first.title}`);
+});
+
+
+// ── Test 12: Specificity + region inference for applied guidance ──
+await test("Applied guidance specificity", async () => {
+  const applied = getAppliedFrameworkGuidance("EU AI hiring platform for recruitment", "all", 3);
+  if (!applied.length) throw new Error("Expected applied guidance results");
+  const first = applied[0];
+  if (!first.whyItApplies.includes("EU")) throw new Error("Expected use-case specific explanation with region");
+  const stepBlob = (first.implementationSteps || []).join(" ").toLowerCase();
+  if (!stepBlob.includes("bias") && !stepBlob.includes("human review")) {
+    throw new Error("Expected hiring-specific controls in implementation steps");
+  }
+  pass(`Specific guidance includes region + hiring controls: ${first.title}`);
 });
 
 // ── Summary ───────────────────────────────────────────────────

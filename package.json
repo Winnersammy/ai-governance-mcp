@@ -1,6 +1,6 @@
 {
   "name": "ai-governance-mcp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "MCP server for AI governance laws, regulations, and frameworks",
   "type": "module",
   "main": "src/index.js",
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node src/index.js",
     "start:sse": "PORT=3100 node src/index.js",
-    "test": "node test/client.js"
+    "test": "node test/client.js",
+    "test:terminal": "bash scripts/terminal-smoke.sh"
   },
   "keywords": [
     "mcp",

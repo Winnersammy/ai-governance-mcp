@@ -37,6 +37,24 @@ export const SOURCES = {
         status: "In force",
         type: "Regulation",
       },
+      {
+        id: "32022L2464",
+        title: "Corporate Sustainability Reporting Directive (CSRD)",
+        celex: "32022L2464",
+        url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2464",
+        date: "2022-12-14",
+        status: "In force",
+        type: "Directive",
+      },
+      {
+        id: "32024L1760",
+        title: "Corporate Sustainability Due Diligence Directive (CSDDD)",
+        celex: "32024L1760",
+        url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1760",
+        date: "2024-07-05",
+        status: "In force",
+        type: "Directive",
+      },
     ],
   },
 
@@ -82,6 +100,14 @@ export const SOURCES = {
         status: "Active",
         type: "Framework",
       },
+      {
+        id: "SEC-CLIMATE-2024",
+        title: "SEC Climate-Related Disclosure Rule (adopted 2024, litigation pending)",
+        url: "https://www.sec.gov/rules-regulations/2024/03/enhancement-standardization-climate-related-disclosures-investors",
+        date: "2024-03-06",
+        status: "Adopted; implementation stayed",
+        type: "Rule",
+      },
     ],
   },
 
@@ -114,6 +140,22 @@ export const SOURCES = {
         status: "Active",
         type: "Code of Conduct",
       },
+      {
+        id: "ISSB-IFRS-S1-S2",
+        title: "ISSB IFRS S1 and S2 Sustainability Disclosure Standards",
+        url: "https://www.ifrs.org/issued-standards/ifrs-sustainability-standards-navigator/",
+        date: "2023-06-26",
+        status: "Active",
+        type: "Disclosure Standard",
+      },
+      {
+        id: "UNESCO-AI-ETHICS",
+        title: "UNESCO Recommendation on the Ethics of AI",
+        url: "https://unesdoc.unesco.org/ark:/48223/pf0000381137",
+        date: "2021-11-23",
+        status: "Active",
+        type: "Recommendation",
+      },
     ],
   },
 
@@ -138,6 +180,14 @@ export const SOURCES = {
         label: "Federal Register — AI (all types)",
         url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=artificial+intelligence",
       },
+      {
+        label: "Federal Register — Climate & Sustainability",
+        url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=climate+disclosure+OR+sustainability",
+      },
+      {
+        label: "ESG Today",
+        url: "https://www.esgtoday.com/feed/",
+      },
     ],
   },
 };
@@ -153,4 +203,31 @@ export const ALL_RSS_FEEDS = [
   ...SOURCES.govinfo.rssFeeds,
   ...SOURCES.oecd.rssFeeds,
   ...SOURCES.news.rssFeeds,
+];
+
+export const GENERIC_RESOURCE_URLS = [
+  {
+    label: "OECD AI Policy Observatory",
+    url: "https://oecd.ai",
+  },
+  {
+    label: "EU EUR-Lex AI Act",
+    url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+  },
+  {
+    label: "US Federal Register AI Search",
+    url: "https://www.federalregister.gov/documents/search?conditions%5Bterm%5D=artificial+intelligence",
+  },
+  {
+    label: "NIST AI Risk Management Framework",
+    url: "https://airc.nist.gov/RMF",
+  },
+  {
+    label: "UNESCO AI Ethics Recommendation",
+    url: "https://unesdoc.unesco.org/ark:/48223/pf0000381137",
+  },
+  {
+    label: "IFRS Sustainability Standards Navigator",
+    url: "https://www.ifrs.org/issued-standards/ifrs-sustainability-standards-navigator/",
+  },
 ];

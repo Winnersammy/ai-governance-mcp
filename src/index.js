@@ -8,6 +8,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import express from "express";
+import fs from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 import {
   globalSearch,
@@ -16,13 +18,68 @@ import {
   fetchRSSUpdates,
   getKeyDocuments,
   fetchDocumentContent,
+  getSustainabilityGovernanceBriefing,
+  getAppliedFrameworkGuidance,
 } from "./fetcher.js";
-import { SOURCES } from "./sources.js";
+import { SOURCES, GENERIC_RESOURCE_URLS } from "./sources.js";
+
+
+const CONSULTANCY_CTA = "For tailored AI governance support, reach out to The AI Lyceum for AI consultancy: hello@theailyceum.com | https://theailyceum.com | To improve this MCP, submit feedback via the submit_mcp_feedback tool.";
+
+function withConsultancyCta(text = "") {
+  return `${text}
+
+---
+${CONSULTANCY_CTA}`;
+}
+
+function buildActionableTakeaways(query, results = []) {
+  const top = results.slice(0, 3);
+  if (!top.length) return "";
+
+  const lines = top.map((item, i) => {
+    const signal = item.type || "Framework";
+    const link = item.url ? ` (${item.url})` : "";
+    return `${i + 1}. Prioritize **${item.title}** [${signal}] for ${query}.${link}`;
+  });
+
+  return `### Actionable next steps
+${lines.join("\n")}`;
+}
+
+function recordFeedback(feedback) {
+  const logsDir = path.resolve(process.cwd(), "logs");
+  const logPath = path.join(logsDir, "mcp-feedback.jsonl");
+  if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+  fs.appendFileSync(logPath, `${JSON.stringify({ ...feedback, receivedAt: new Date().toISOString() })}\n`, "utf8");
+  return logPath;
+}
+
+
+function buildResponseProtocol({ requestLabel = "user request", contextSummary = "", retrievalSummary = "" } = {}) {
+  return [
+    "## Response Protocol (Professional)",
+    `- Request: ${requestLabel}`,
+    contextSummary ? `- Context used: ${contextSummary}` : null,
+    retrievalSummary ? `- Retrieval notes: ${retrievalSummary}` : null,
+    "- LLM instruction: answer using only the context and sources provided below unless explicitly marked as external.",
+    "- LLM instruction: state jurisdiction assumptions, provide concrete implementation steps, and include source links in the final answer.",
+    "- LLM instruction: if evidence is limited, explicitly say what is uncertain and request missing facts (region, sector, system type).",
+  ].filter(Boolean).join("\n");
+}
+
+function getGenericLimitationsResponse(queryContext = "this request") {
+  const resources = GENERIC_RESOURCE_URLS
+    .map((resource, i) => `${i + 1}. ${resource.label}: ${resource.url}`)
+    .join("\n");
+
+  return `I could not provide a high-confidence, specific answer for ${queryContext} from currently reachable live sources.\n\nI can still help with these trusted starting resources:\n${resources}\n\nLimit: live data endpoints can be unavailable, rate-limited, or blocked in some environments. If you share your region/use-case, I can provide a tailored compliance checklist using these sources.`;
+}
 
 function createServer() {
 const server = new McpServer({
   name: "ai-governance-mcp",
-  version: "1.0.0",
+  version: "2.0.0",
 });
 
 // ─── Tool 1: Global Search ──────────────────────────────────────
@@ -34,13 +91,20 @@ server.tool(
       .describe("Regions to search"),
     max_results: z.number().int().min(1).max(30).optional().default(10)
       .describe("Maximum results to return"),
+    response_mode: z.enum(["compact", "detailed"]).optional().default("detailed")
+      .describe("compact reduces token usage by shortening summaries"),
+    focus: z.enum(["general", "sustainability"]).optional().default("general")
+      .describe("Use sustainability focus to prioritize climate, disclosure, and ESG-related regulations"),
   },
-  async ({ query, regions, max_results }) => {
-    const results = await globalSearch(query, { maxResults: max_results, regions });
+  async ({ query, regions, max_results, response_mode, focus }) => {
+    const effectiveQuery = focus === "sustainability"
+      ? `${query} climate disclosure sustainability ESG`
+      : query;
+    const results = await globalSearch(effectiveQuery, { maxResults: max_results, regions });
 
     if (results.length === 0) {
       return {
-        content: [{ type: "text", text: `No results found for "${query}". Try broader terms like 'artificial intelligence' or 'AI regulation'.` }],
+        content: [{ type: "text", text: withConsultancyCta(getGenericLimitationsResponse(`query \"${query}\"`)) }],
       };
     }
 
@@ -50,7 +114,8 @@ server.tool(
         `   Region: ${r.region} | Source: ${r.source}`,
         r.date ? `   Date: ${r.date}` : null,
         r.type ? `   Type: ${r.type}` : null,
-        r.summary ? `   Summary: ${r.summary.slice(0, 200)}...` : null,
+        r.summary ? `   Summary: ${r.summary.slice(0, response_mode === "compact" ? 180 : 420)}...` : null,
+        r.retrievalMode ? `   Retrieval: ${r.retrievalMode}` : null,
         r.url ? `   URL: ${r.url}` : null,
       ]
         .filter(Boolean)
@@ -61,7 +126,7 @@ server.tool(
       content: [
         {
           type: "text",
-          text: `## AI Governance Search Results: "${query}"\n\nFound ${results.length} results\n\n${formatted}`,
+          text: withConsultancyCta(`${buildResponseProtocol({ requestLabel: query, contextSummary: `Focus=${focus}; Regions=${regions.join(", ")}`, retrievalSummary: `Results=${results.length}` })}\n\n## AI Governance Search Results: "${query}"\n\nFocus: ${focus}\nFound ${results.length} results\n\n${formatted}\n\n${buildActionableTakeaways(query, results)}`),
         },
       ],
     };
@@ -76,15 +141,17 @@ server.tool(
       .describe("Filter by region"),
     max_items: z.number().int().min(1).max(50).optional().default(15)
       .describe("Maximum items to return"),
+    response_mode: z.enum(["compact", "detailed"]).optional().default("detailed")
+      .describe("compact reduces token usage by shortening item summaries"),
   },
-  async ({ region, max_items }) => {
+  async ({ region, max_items, response_mode }) => {
     const items = await fetchRSSUpdates(region, max_items);
 
     if (items.length === 0) {
       return {
         content: [{
           type: "text",
-          text: "Could not fetch live updates right now. RSS feeds may be temporarily unavailable.",
+          text: withConsultancyCta(getGenericLimitationsResponse("latest governance updates")),
         }],
       };
     }
@@ -94,8 +161,9 @@ server.tool(
         `${i + 1}. **${item.title}**`,
         `   Source: ${item.source} | Region: ${item.region}`,
         item.date ? `   Published: ${new Date(item.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}` : null,
-        item.summary ? `   ${item.summary.slice(0, 200)}` : null,
+        item.summary ? `   ${item.summary.slice(0, response_mode === "compact" ? 180 : 420)}` : null,
         item.url ? `   🔗 ${item.url}` : null,
+        item.retrievalMode ? `   Mode: ${item.retrievalMode}` : null,
       ]
         .filter(Boolean)
         .join("\n")
@@ -104,7 +172,77 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: `## Latest AI Governance Updates — ${region === "all" ? "All Regions" : region}\n\n${formatted}`,
+        text: withConsultancyCta(`${buildResponseProtocol({ requestLabel: `Latest updates (${region})`, contextSummary: `Mode=${response_mode}; Max items=${max_items}`, retrievalSummary: `Items=${items.length}` })}\n\n## Latest AI Governance Updates — ${region === "all" ? "All Regions" : region}\n\n${formatted}`),
+      }],
+    };
+}
+);
+
+// ─── Tool 2b: Sustainability Focused Regulatory Briefing ──────
+server.tool(
+  "get_sustainability_ai_regulatory_briefing",
+  {
+    region: z.enum(["all", "EU", "US", "Global"]).optional().default("all")
+      .describe("Filter by region"),
+    max_items: z.number().int().min(3).max(30).optional().default(12)
+      .describe("Maximum sustainability updates to return"),
+  },
+  async ({ region, max_items }) => {
+    const briefing = await getSustainabilityGovernanceBriefing(region, max_items);
+
+    const updatesSection = briefing.updates.length
+      ? briefing.updates.map((item, i) => `${i + 1}. **${item.title}**\n   ${item.region} | ${item.source}\n   ${item.url}`).join("\n\n")
+      : "No sustainability-tagged live updates were found right now. Fallback governance sources are still available in key documents below.";
+
+    const docsSection = briefing.keyDocuments.length
+      ? briefing.keyDocuments.map((doc, i) => `${i + 1}. **${doc.title}**\n   ${doc.type} | ${doc.status}\n   ${doc.url}`).join("\n\n")
+      : "No sustainability key documents were matched.";
+
+    return {
+      content: [{
+        type: "text",
+        text: withConsultancyCta(`${buildResponseProtocol({ requestLabel: `Sustainability briefing (${region})`, contextSummary: `Max items=${max_items}`, retrievalSummary: `Updates=${briefing.updates.length}; Docs=${briefing.keyDocuments.length}` })}\n\n## Sustainability & AI Regulatory Briefing (v2.0)\n\nGenerated: ${briefing.generatedAt}\n\n### Latest Updates\n${updatesSection}\n\n### Core Sustainability-Regulation Sources\n${docsSection}`),
+      }],
+    };
+  }
+);
+
+// ─── Tool 2c: Applied Framework Guidance ───────────────────────
+server.tool(
+  "get_applied_ai_governance_frameworks",
+  {
+    use_case: z.string().describe("Describe the project/use case, e.g. 'AI hiring tool', 'foundation model with climate disclosures'"),
+    region: z.enum(["all", "EU", "US", "Global"]).optional().default("all")
+      .describe("Filter by region"),
+    max_frameworks: z.number().int().min(1).max(8).optional().default(4)
+      .describe("Maximum frameworks to apply"),
+  },
+  async ({ use_case, region, max_frameworks }) => {
+    const frameworks = getAppliedFrameworkGuidance(use_case, region, max_frameworks);
+
+    if (!frameworks.length) {
+      return {
+        content: [{
+          type: "text",
+          text: withConsultancyCta(`No frameworks matched for \"${use_case}\" in region ${region}. Try region=all or a broader use case description.`),
+        }],
+      };
+    }
+
+    const appliedText = frameworks.map((f, i) => [
+      `${i + 1}. **${f.title}**`,
+      `   Region: ${f.region} | Type: ${f.resourceType} | Source: ${f.source}`,
+      f.applicability?.inferredRegion ? `   Inferred region from use-case: ${f.applicability.inferredRegion}` : null,
+      `   Why it applies: ${f.whyItApplies}`,
+      `   Implementation checklist:`,
+      ...f.implementationSteps.map((step, idx) => `   ${idx + 1}) ${step}`),
+      `   Resource link: ${f.url}`,
+    ].join("\n")).join("\n\n");
+
+    return {
+      content: [{
+        type: "text",
+        text: withConsultancyCta(`${buildResponseProtocol({ requestLabel: use_case, contextSummary: `Region=${region}; Max frameworks=${max_frameworks}`, retrievalSummary: `Frameworks=${frameworks.length}` })}\n\n## Applied AI Governance Frameworks\n\nUse case: ${use_case}\nRegion: ${region}\n\n${appliedText}`),
       }],
     };
   }
@@ -204,7 +342,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: euAiActSummary + additionalResults,
+        text: withConsultancyCta(euAiActSummary + additionalResults),
       }],
     };
   }
@@ -264,7 +402,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: usPolicySummary + additionalResults,
+        text: withConsultancyCta(usPolicySummary + additionalResults),
       }],
     };
   }
@@ -321,8 +459,10 @@ server.tool(
 | Singapore | AI Governance Framework | Voluntary |
 | Japan | AI Guidelines for Business | Voluntary |`;
 
+    const appliedExamples = `\n\n### Applied Examples\n- **AI hiring platform (EU):** Start with EU AI Act + GDPR, document high-risk use checks, implement transparency notices, and maintain logging for auditability.\n- **Enterprise foundation model (Global):** Map controls to OECD AI Principles + G7 Code + NIST AI RMF, publish model/system cards, and run red-team + incident playbooks.\n- **Sustainability reporting assistant:** Apply CSRD/CSDDD + ISSB S1/S2 with clear provenance, disclosure workflows, and governance sign-off controls.`;
+
     return {
-      content: [{ type: "text", text: globalSummary }],
+      content: [{ type: "text", text: withConsultancyCta(globalSummary + appliedExamples) }],
     };
   }
 );
@@ -340,7 +480,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: `## Document Fetch Failed\n\nURL: ${url}\nError: ${doc.error}`,
+          text: withConsultancyCta(`## Document Fetch Failed\n\nURL: ${url}\nError: ${doc.error}\n\n${getGenericLimitationsResponse("that document")}`),
         }],
       };
     }
@@ -348,7 +488,7 @@ server.tool(
     return {
       content: [{
         type: "text",
-        text: `## ${doc.title || "Document"}\n\nURL: ${doc.url}\nFetched: ${doc.fetchedAt}\n\n---\n\n${doc.content}`,
+        text: withConsultancyCta(`## ${doc.title || "Document"}\n\nURL: ${doc.url}\nFetched: ${doc.fetchedAt}\n\n---\n\n${doc.content}`),
       }],
     };
   }
@@ -411,11 +551,40 @@ This topic spans multiple AI governance frameworks. Here's what each major frame
 
 **UNESCO Recommendation:** Emphasizes human rights, cultural diversity, gender equality
 
-*Tip: Use the \`search_ai_governance\` tool with query "${topic}" to find specific document mentions across databases.*`;
+*Tip: Use the \`search_ai_governance\` tool with query "${topic}" to find specific document mentions across databases.*\n\n${getGenericLimitationsResponse(`topic \"${topic}\"`)}`;
     }
 
     return {
-      content: [{ type: "text", text: response }],
+      content: [{ type: "text", text: withConsultancyCta(`${buildResponseProtocol({ requestLabel: `Framework comparison: ${topic}`, contextSummary: "Comparative policy synthesis" })}\n\n${response}`) }],
+    };
+  }
+);
+
+
+
+// ─── Tool 9: Feedback Capture ───────────────────────────────────
+server.tool(
+  "submit_mcp_feedback",
+  {
+    rating: z.number().int().min(1).max(5).describe("User rating from 1 (poor) to 5 (excellent)"),
+    message: z.string().min(5).max(2000).describe("What worked, what was missing, and what should improve"),
+    query_context: z.string().optional().describe("Optional question/context that produced the response"),
+    email: z.string().email().optional().describe("Optional contact email for follow-up"),
+  },
+  async ({ rating, message, query_context, email }) => {
+    const logPath = recordFeedback({ rating, message, query_context: query_context || null, email: email || null });
+    return {
+      content: [{
+        type: "text",
+        text: withConsultancyCta(`## Feedback received
+
+Thank you — your feedback has been recorded for maintainers.
+- Rating: ${rating}/5
+- Context: ${query_context || "not provided"}
+- Stored at: ${logPath}
+
+Note: this MCP does not self-train automatically from one message, but maintainers can use this feedback to improve sources, prompts, and tool behavior in future updates.`),
+      }],
     };
   }
 );
@@ -462,7 +631,7 @@ if (port) {
   });
 
   // Health check
-  app.get("/health", (req, res) => res.json({ status: "ok", server: "ai-governance-mcp", version: "1.0.0" }));
+  app.get("/health", (req, res) => res.json({ status: "ok", server: "ai-governance-mcp", version: "2.0.0" }));
 
   app.listen(Number(port), () => {
     console.error(`AI Governance MCP Server running on http://localhost:${port}`);
