@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import RSSParser from "rss-parser";
+import { LRUCache } from "./cache.js";
 import { SOURCES, ALL_RSS_FEEDS, ALL_KEY_DOCS } from "./sources.js";
 
 const rssParser = new RSSParser({
@@ -13,9 +14,14 @@ const http = axios.create({
   headers: { "User-Agent": "AI-Governance-MCP/2.0" },
 });
 
-const cache = new Map();
 const CACHE_TTL = 30 * 60 * 1000;
+const cache = new LRUCache(200, CACHE_TTL);
 const SUMMARY_LIMIT = 180;
+const INTERNAL_FETCH_CAP = 30;
+
+export const SUSTAINABILITY_KEYWORDS = [
+  "sustain", "climate", "energy", "environment", "esg", "csrd", "csddd", "disclosure", "green", "emission",
+];
 
 const COUNTRY_REGION_MAP = {
   eu: "EU",
@@ -80,15 +86,6 @@ const FRAMEWORK_RULES = [
     ],
   },
 ];
-
-function getCached(key) {
-  const entry = cache.get(key);
-  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
-  return null;
-}
-function setCached(key, data) {
-  cache.set(key, { data, ts: Date.now() });
-}
 
 function compactSummary(text = "", limit = SUMMARY_LIMIT) {
   return text.replace(/\s+/g, " ").trim().slice(0, limit);
@@ -186,13 +183,13 @@ async function withRetry(label, fn, maxAttempts = 2) {
   throw new Error(`${label}: ${lastErr?.message || "unknown error"}`);
 }
 
-export function searchGlobalFrameworks(query, maxResults = 10) {
-  const cacheKey = `global-frameworks:${query}:${maxResults}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+export function searchGlobalFrameworks(query, maxResults = 10, { queryTokens: preTokens, inferredRegion: preRegion } = {}) {
+  const cacheKey = `global-frameworks:${query}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxResults);
 
-  const queryTokens = tokenizeQuery(query);
-  const inferredRegion = inferRegionFromText(query);
+  const queryTokens = preTokens || tokenizeQuery(query);
+  const inferredRegion = preRegion !== undefined ? preRegion : inferRegionFromText(query);
 
   const globalCorpus = [
     ...SOURCES.oecd.keyDocs,
@@ -201,7 +198,6 @@ export function searchGlobalFrameworks(query, maxResults = 10) {
   ].map((doc) => ({
     ...doc,
     source: doc.source || "Global Framework Corpus",
-    region: doc.region || (SOURCES.eurlex.keyDocs.includes(doc) ? "EU" : SOURCES.govinfo.keyDocs.includes(doc) ? "US" : "Global"),
     summary: compactSummary(`${doc.title} (${doc.type}) — curated governance source.`),
   }));
 
@@ -213,22 +209,22 @@ export function searchGlobalFrameworks(query, maxResults = 10) {
     })
     .filter((item) => item._score > 0 || queryTokens.length === 0)
     .sort((a, b) => (b._score - a._score) || (new Date(b.date || 0) - new Date(a.date || 0)))
-    .slice(0, maxResults)
+    .slice(0, INTERNAL_FETCH_CAP)
     .map(({ _score, ...item }) => item);
 
-  setCached(cacheKey, ranked);
-  return ranked;
+  cache.set(cacheKey, ranked);
+  return ranked.slice(0, maxResults);
 }
 
 export function getAppliedFrameworkGuidance(useCase = "general ai system", region = "all", maxFrameworks = 4) {
-  const cacheKey = `applied-guidance:${useCase}:${region}:${maxFrameworks}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+  const cacheKey = `applied-guidance:${useCase}:${region}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxFrameworks);
 
   const frameworks = dedupeByUrl([
-    ...SOURCES.eurlex.keyDocs.map((d) => ({ ...d, region: "EU", source: "EUR-Lex" })),
-    ...SOURCES.govinfo.keyDocs.map((d) => ({ ...d, region: "US", source: "US Federal" })),
-    ...SOURCES.oecd.keyDocs.map((d) => ({ ...d, region: "Global", source: "OECD / Global" })),
+    ...SOURCES.eurlex.keyDocs.map((d) => ({ ...d, source: "EUR-Lex" })),
+    ...SOURCES.govinfo.keyDocs.map((d) => ({ ...d, source: "US Federal" })),
+    ...SOURCES.oecd.keyDocs.map((d) => ({ ...d, source: "OECD / Global" })),
   ]);
 
   const inferredRegion = inferRegionFromText(useCase);
@@ -245,7 +241,7 @@ export function getAppliedFrameworkGuidance(useCase = "general ai system", regio
       return { ...item, _score: baseScore + specificity + recency };
     })
     .sort((a, b) => b._score - a._score)
-    .slice(0, maxFrameworks)
+    .slice(0, INTERNAL_FETCH_CAP)
     .map(({ _score, ...item }) => ({
       ...item,
       whyItApplies: `${item.title} is directly relevant to "${useCase}" because it provides enforceable or operational controls for this type of deployment in ${item.region}.`,
@@ -257,8 +253,8 @@ export function getAppliedFrameworkGuidance(useCase = "general ai system", regio
       },
     }));
 
-  setCached(cacheKey, ranked);
-  return ranked;
+  cache.set(cacheKey, ranked);
+  return ranked.slice(0, maxFrameworks);
 }
 
 async function fetchFallbackUpdates(region = "all", maxItems = 20) {
@@ -300,7 +296,6 @@ async function fetchFallbackUpdates(region = "all", maxItems = 20) {
             fallbackItems.push({
               ...doc,
               source: "OECD / Global Framework",
-              region: "Global",
               summary: compactSummary(`${doc.title} — global policy framework reference.`),
               retrievalMode: "fallback-keydocs",
             });
@@ -316,9 +311,9 @@ async function fetchFallbackUpdates(region = "all", maxItems = 20) {
 }
 
 export async function searchEurLex(query, maxResults = 10) {
-  const cacheKey = `eurlex:${query}:${maxResults}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+  const cacheKey = `eurlex:${query}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxResults);
 
   try {
     const params = new URLSearchParams({
@@ -338,7 +333,7 @@ export async function searchEurLex(query, maxResults = 10) {
     const results = [];
 
     $(".SearchResult").each((i, el) => {
-      if (i >= maxResults) return false;
+      if (i >= INTERNAL_FETCH_CAP) return false;
       const title = $(el).find(".title a").text().trim();
       const href = $(el).find(".title a").attr("href");
       const date = $(el).find(".date").text().trim();
@@ -365,8 +360,8 @@ export async function searchEurLex(query, maxResults = 10) {
       });
     }
 
-    setCached(cacheKey, results);
-    return results;
+    cache.set(cacheKey, results);
+    return results.slice(0, maxResults);
   } catch (err) {
     console.error("EUR-Lex search error:", err.message);
     return SOURCES.eurlex.keyDocs.map((d) => ({
@@ -379,16 +374,16 @@ export async function searchEurLex(query, maxResults = 10) {
 }
 
 export async function searchFederalRegister(query, maxResults = 10) {
-  const cacheKey = `fedregister:${query}:${maxResults}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+  const cacheKey = `fedregister:${query}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxResults);
 
   try {
     const res = await withRetry("Federal Register request", () => http.get("https://www.federalregister.gov/api/v1/articles", {
       params: {
         conditions: { term: query },
         fields: ["title", "document_number", "publication_date", "abstract", "html_url", "type", "agencies"],
-        per_page: maxResults,
+        per_page: INTERNAL_FETCH_CAP,
         order: "newest",
       },
     }));
@@ -404,8 +399,8 @@ export async function searchFederalRegister(query, maxResults = 10) {
       region: "US",
     }));
 
-    setCached(cacheKey, results);
-    return results;
+    cache.set(cacheKey, results);
+    return results.slice(0, maxResults);
   } catch (err) {
     console.error("Federal Register search error:", err.message);
     return SOURCES.govinfo.keyDocs.map((d) => ({
@@ -418,15 +413,15 @@ export async function searchFederalRegister(query, maxResults = 10) {
 }
 
 export async function searchGovInfo(query, maxResults = 10) {
-  const cacheKey = `govinfo:${query}:${maxResults}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+  const cacheKey = `govinfo:${query}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxResults);
 
   try {
     const res = await withRetry("GovInfo request", () => http.get("https://api.govinfo.gov/search", {
       params: {
         query,
-        pageSize: maxResults,
+        pageSize: INTERNAL_FETCH_CAP,
         offsetMark: "*",
         sorts: [{ field: "publishdate", sortOrder: "DESC" }],
         filters: {
@@ -445,8 +440,8 @@ export async function searchGovInfo(query, maxResults = 10) {
       region: "US",
     }));
 
-    setCached(cacheKey, results);
-    return results;
+    cache.set(cacheKey, results);
+    return results.slice(0, maxResults);
   } catch (err) {
     console.error("GovInfo search error:", err.message);
     return [];
@@ -454,18 +449,13 @@ export async function searchGovInfo(query, maxResults = 10) {
 }
 
 export async function fetchRSSUpdates(region = "all", maxItems = 20) {
-  const cacheKey = `rss:${region}:${maxItems}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+  const cacheKey = `rss:${region}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached.slice(0, maxItems);
 
   const feedsToFetch = region === "all"
     ? ALL_RSS_FEEDS
-    : ALL_RSS_FEEDS.filter((f) => {
-      if (region === "EU") return SOURCES.eurlex.rssFeeds.includes(f);
-      if (region === "US") return SOURCES.govinfo.rssFeeds.includes(f);
-      if (region === "Global") return SOURCES.oecd.rssFeeds.includes(f) || SOURCES.news.rssFeeds.includes(f);
-      return true;
-    });
+    : ALL_RSS_FEEDS.filter((f) => f.region === region);
 
   const allItems = [];
   let successfulFeeds = 0;
@@ -482,11 +472,7 @@ export async function fetchRSSUpdates(region = "all", maxItems = 20) {
           summary: compactSummary(item.contentSnippet || item.summary || ""),
           feedLabel: feed.label,
           source: parsed.title || feed.label,
-          region: feed.label.includes("EU") || feed.label.includes("EUR")
-            ? "EU"
-            : feed.label.includes("Federal")
-            ? "US"
-            : "Global",
+          region: feed.region,
           retrievalMode: "rss-live",
         }));
         allItems.push(...items);
@@ -502,36 +488,29 @@ export async function fetchRSSUpdates(region = "all", maxItems = 20) {
     return db - da;
   });
 
-  const results = dedupedRssItems.slice(0, maxItems);
+  const results = dedupedRssItems.slice(0, INTERNAL_FETCH_CAP);
 
   if (successfulFeeds === 0 || results.length === 0) {
     const fallbackResults = await fetchFallbackUpdates(region, maxItems);
-    setCached(cacheKey, fallbackResults);
+    cache.set(cacheKey, fallbackResults);
     return fallbackResults;
   }
 
-  setCached(cacheKey, results);
-  return results;
+  cache.set(cacheKey, results);
+  return results.slice(0, maxItems);
 }
 
 export async function getSustainabilityGovernanceBriefing(region = "all", maxItems = 12) {
   const updates = await fetchRSSUpdates(region, maxItems);
-  const sustainabilityKeywords = [
-    "sustain", "climate", "energy", "environment", "esg", "csrd", "csddd", "disclosure", "green", "emission",
-  ];
 
   const filteredUpdates = updates.filter((item) => {
     const text = `${item.title || ""} ${item.summary || ""}`.toLowerCase();
-    return sustainabilityKeywords.some((kw) => text.includes(kw));
+    return SUSTAINABILITY_KEYWORDS.some((kw) => text.includes(kw));
   });
 
-  const globalDocs = [
-    ...SOURCES.eurlex.keyDocs,
-    ...SOURCES.govinfo.keyDocs,
-    ...SOURCES.oecd.keyDocs,
-  ].filter((doc) => {
+  const globalDocs = ALL_KEY_DOCS.filter((doc) => {
     const text = `${doc.title} ${doc.type}`.toLowerCase();
-    return sustainabilityKeywords.some((kw) => text.includes(kw));
+    return SUSTAINABILITY_KEYWORDS.some((kw) => text.includes(kw));
   });
 
   return {
@@ -543,17 +522,12 @@ export async function getSustainabilityGovernanceBriefing(region = "all", maxIte
 
 export function getKeyDocuments(region = "all") {
   if (region === "all") return ALL_KEY_DOCS;
-  return ALL_KEY_DOCS.filter(
-    (d) =>
-      (region === "EU" && SOURCES.eurlex.keyDocs.includes(d)) ||
-      (region === "US" && SOURCES.govinfo.keyDocs.includes(d)) ||
-      (region === "Global" && SOURCES.oecd.keyDocs.includes(d))
-  );
+  return ALL_KEY_DOCS.filter((d) => d.region === region);
 }
 
 export async function fetchDocumentContent(url) {
   const cacheKey = `doc:${url}`;
-  const cached = getCached(cacheKey);
+  const cached = cache.get(cacheKey);
   if (cached) return cached;
 
   try {
@@ -582,7 +556,7 @@ export async function fetchDocumentContent(url) {
       fetchedAt: new Date().toISOString(),
     };
 
-    setCached(cacheKey, result);
+    cache.set(cacheKey, result);
     return result;
   } catch (err) {
     return {
@@ -596,6 +570,9 @@ export async function fetchDocumentContent(url) {
 export async function globalSearch(query, options = {}) {
   const { maxResults = 10, regions = ["EU", "US", "Global"] } = options;
 
+  const queryTokens = tokenizeQuery(query);
+  const inferredRegion = inferRegionFromText(query);
+
   const searches = [];
 
   if (regions.includes("EU")) searches.push(searchEurLex(query, maxResults));
@@ -603,7 +580,7 @@ export async function globalSearch(query, options = {}) {
     searches.push(searchFederalRegister(query, maxResults));
     searches.push(searchGovInfo(query, Math.min(maxResults, 5)));
   }
-  if (regions.includes("Global")) searches.push(Promise.resolve(searchGlobalFrameworks(query, maxResults)));
+  if (regions.includes("Global")) searches.push(Promise.resolve(searchGlobalFrameworks(query, maxResults, { queryTokens, inferredRegion })));
 
   const allResults = await Promise.allSettled(searches);
   const combined = [];
@@ -611,9 +588,6 @@ export async function globalSearch(query, options = {}) {
   allResults.forEach((r) => {
     if (r.status === "fulfilled") combined.push(...r.value);
   });
-
-  const queryTokens = tokenizeQuery(query);
-  const inferredRegion = inferRegionFromText(query);
 
   const deduped = dedupeByUrl(combined)
     .map((item) => {

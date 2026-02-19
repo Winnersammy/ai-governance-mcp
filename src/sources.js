@@ -10,12 +10,11 @@ export const SOURCES = {
     region: "EU",
     baseUrl: "https://eur-lex.europa.eu",
     searchUrl: "https://eur-lex.europa.eu/search.html",
-    // SPARQL endpoint for structured queries
-    sparqlUrl: "https://publications.europa.eu/webapi/rdf/sparql",
     rssFeeds: [
       {
         label: "EU AI Act Updates",
         url: "https://eur-lex.europa.eu/legal-content/EN/RSS/?uri=CELEX:32024R1689",
+        region: "EU",
       },
     ],
     keyDocs: [
@@ -27,6 +26,7 @@ export const SOURCES = {
         date: "2024-07-12",
         status: "In force",
         type: "Regulation",
+        region: "EU",
       },
       {
         id: "32016R0679",
@@ -36,6 +36,7 @@ export const SOURCES = {
         date: "2016-04-27",
         status: "In force",
         type: "Regulation",
+        region: "EU",
       },
       {
         id: "32022L2464",
@@ -45,6 +46,7 @@ export const SOURCES = {
         date: "2022-12-14",
         status: "In force",
         type: "Directive",
+        region: "EU",
       },
       {
         id: "32024L1760",
@@ -54,6 +56,7 @@ export const SOURCES = {
         date: "2024-07-05",
         status: "In force",
         type: "Directive",
+        region: "EU",
       },
     ],
   },
@@ -69,10 +72,12 @@ export const SOURCES = {
       {
         label: "Federal Register — AI Rules",
         url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=artificial+intelligence&conditions[type][]=RULE&conditions[type][]=PRORULE",
+        region: "US",
       },
       {
         label: "Federal Register — AI Notices",
         url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=artificial+intelligence&conditions[type][]=NOTICE",
+        region: "US",
       },
     ],
     keyDocs: [
@@ -83,6 +88,7 @@ export const SOURCES = {
         date: "2023-10-30",
         status: "Revoked (Jan 2025)",
         type: "Executive Order",
+        region: "US",
       },
       {
         id: "EO-14179",
@@ -91,6 +97,7 @@ export const SOURCES = {
         date: "2025-01-20",
         status: "Active",
         type: "Executive Order",
+        region: "US",
       },
       {
         id: "NIST-AI-RMF",
@@ -99,6 +106,7 @@ export const SOURCES = {
         date: "2023-01-26",
         status: "Active",
         type: "Framework",
+        region: "US",
       },
       {
         id: "SEC-CLIMATE-2024",
@@ -107,6 +115,7 @@ export const SOURCES = {
         date: "2024-03-06",
         status: "Adopted; implementation stayed",
         type: "Rule",
+        region: "US",
       },
     ],
   },
@@ -121,6 +130,7 @@ export const SOURCES = {
       {
         label: "OECD AI News",
         url: "https://oecd.ai/en/feed",
+        region: "Global",
       },
     ],
     keyDocs: [
@@ -131,6 +141,7 @@ export const SOURCES = {
         date: "2024-05-03",
         status: "Active",
         type: "Principles",
+        region: "Global",
       },
       {
         id: "G7-Hiroshima-AI-Process",
@@ -139,6 +150,7 @@ export const SOURCES = {
         date: "2023-10-30",
         status: "Active",
         type: "Code of Conduct",
+        region: "Global",
       },
       {
         id: "ISSB-IFRS-S1-S2",
@@ -147,6 +159,7 @@ export const SOURCES = {
         date: "2023-06-26",
         status: "Active",
         type: "Disclosure Standard",
+        region: "Global",
       },
       {
         id: "UNESCO-AI-ETHICS",
@@ -155,6 +168,7 @@ export const SOURCES = {
         date: "2021-11-23",
         status: "Active",
         type: "Recommendation",
+        region: "Global",
       },
     ],
   },
@@ -167,26 +181,32 @@ export const SOURCES = {
       {
         label: "Future of Life Institute",
         url: "https://futureoflife.org/feed/",
+        region: "Global",
       },
       {
         label: "AI Now Institute",
         url: "https://ainowinstitute.org/feed",
+        region: "Global",
       },
       {
         label: "Stanford HAI",
         url: "https://hai.stanford.edu/news/rss.xml",
+        region: "Global",
       },
       {
         label: "Federal Register — AI (all types)",
         url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=artificial+intelligence",
+        region: "US",
       },
       {
         label: "Federal Register — Climate & Sustainability",
         url: "https://www.federalregister.gov/api/v1/articles.rss?conditions[term]=climate+disclosure+OR+sustainability",
+        region: "US",
       },
       {
         label: "ESG Today",
         url: "https://www.esgtoday.com/feed/",
+        region: "Global",
       },
     ],
   },
