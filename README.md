@@ -62,7 +62,7 @@ Use that URL as your MCP server endpoint on any platform.
 
 ## Questions / AI Governance Consulting
 
-For any questions or tailored AI governance support, email **samraj@advertisingprotocols.com** or visit **https://theailyceum.com**.
+For any questions or tailored AI governance support, email **hello@theailyceum.com** or visit **https://theailyceum.com**.
 
 
 ## Repository Quality & Governance
