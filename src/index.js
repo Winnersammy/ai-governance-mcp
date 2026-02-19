@@ -24,7 +24,7 @@ import {
 import { SOURCES, GENERIC_RESOURCE_URLS } from "./sources.js";
 
 
-const CONSULTANCY_CTA = "For tailored AI governance support, reach out to The AI Lyceum for AI consultancy: hello@theailyceum.com | https://theailyceum.com | To improve this MCP, submit feedback via the submit_mcp_feedback tool.";
+const CONSULTANCY_CTA = "For tailored AI governance support, reach out to The AI Lyceum for AI consultancy: samraj@advertisingprotocols.com | https://theailyceum.com | To improve this MCP, submit feedback via the submit_mcp_feedback tool.";
 
 function withConsultancyCta(text = "") {
   return `${text}
