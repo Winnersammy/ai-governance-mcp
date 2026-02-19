@@ -2,6 +2,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import RSSParser from "rss-parser";
 import { SOURCES, ALL_RSS_FEEDS, ALL_KEY_DOCS } from "./sources.js";
+import { LRUCache } from "./cache.js";
 
 const rssParser = new RSSParser({
   timeout: 10000,
@@ -13,8 +14,8 @@ const http = axios.create({
   headers: { "User-Agent": "AI-Governance-MCP/2.0" },
 });
 
-const cache = new Map();
 const CACHE_TTL = 30 * 60 * 1000;
+const cache = new LRUCache(500, CACHE_TTL);
 const SUMMARY_LIMIT = 180;
 
 const COUNTRY_REGION_MAP = {
@@ -82,12 +83,10 @@ const FRAMEWORK_RULES = [
 ];
 
 function getCached(key) {
-  const entry = cache.get(key);
-  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
-  return null;
+  return cache.get(key);
 }
 function setCached(key, data) {
-  cache.set(key, { data, ts: Date.now() });
+  cache.set(key, data);
 }
 
 function compactSummary(text = "", limit = SUMMARY_LIMIT) {
@@ -121,19 +120,24 @@ function escapeRegex(value = "") {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Pre-compile country regexes once at module load to avoid repeated RegExp construction
+const COUNTRY_REGION_PATTERNS = Object.entries(COUNTRY_REGION_MAP).map(
+  ([country, region]) => [new RegExp(`\\b${escapeRegex(country)}\\b`, "i"), region]
+);
+
 function inferRegionFromText(query = "") {
   const lower = query.toLowerCase();
-  for (const [country, region] of Object.entries(COUNTRY_REGION_MAP)) {
-    const rx = new RegExp(`\\b${escapeRegex(country)}\\b`, "i");
+  for (const [rx, region] of COUNTRY_REGION_PATTERNS) {
     if (rx.test(lower)) return region;
   }
   return null;
 }
 
 function scoreRelevance(item, queryTokens = []) {
-  const haystack = `${item.title || ""} ${item.summary || ""} ${item.type || ""}`.toLowerCase();
+  const titleLower = (item.title || "").toLowerCase();
+  const haystack = `${titleLower} ${(item.summary || "").toLowerCase()} ${(item.type || "").toLowerCase()}`;
   return queryTokens.reduce((score, token) => {
-    if ((item.title || "").toLowerCase().includes(token)) return score + 2;
+    if (titleLower.includes(token)) return score + 2;
     if (haystack.includes(token)) return score + 1;
     return score;
   }, 0);
@@ -186,6 +190,23 @@ async function withRetry(label, fn, maxAttempts = 2) {
   throw new Error(`${label}: ${lastErr?.message || "unknown error"}`);
 }
 
+// Pre-build Sets of URLs for O(1) source membership lookups
+const eurlexDocSet = new Set(SOURCES.eurlex.keyDocs.map((d) => d.url));
+const govinfoDocSet = new Set(SOURCES.govinfo.keyDocs.map((d) => d.url));
+const oecdDocSet = new Set(SOURCES.oecd.keyDocs.map((d) => d.url));
+
+// Pre-build the static global corpus once at module load instead of on each call
+const GLOBAL_CORPUS = [
+  ...SOURCES.oecd.keyDocs,
+  ...SOURCES.eurlex.keyDocs,
+  ...SOURCES.govinfo.keyDocs,
+].map((doc) => ({
+  ...doc,
+  source: doc.source || "Global Framework Corpus",
+  region: doc.region || (eurlexDocSet.has(doc.url) ? "EU" : govinfoDocSet.has(doc.url) ? "US" : "Global"),
+  summary: compactSummary(`${doc.title} (${doc.type}) — curated governance source.`),
+}));
+
 export function searchGlobalFrameworks(query, maxResults = 10) {
   const cacheKey = `global-frameworks:${query}:${maxResults}`;
   const cached = getCached(cacheKey);
@@ -194,18 +215,7 @@ export function searchGlobalFrameworks(query, maxResults = 10) {
   const queryTokens = tokenizeQuery(query);
   const inferredRegion = inferRegionFromText(query);
 
-  const globalCorpus = [
-    ...SOURCES.oecd.keyDocs,
-    ...SOURCES.eurlex.keyDocs,
-    ...SOURCES.govinfo.keyDocs,
-  ].map((doc) => ({
-    ...doc,
-    source: doc.source || "Global Framework Corpus",
-    region: doc.region || (SOURCES.eurlex.keyDocs.includes(doc) ? "EU" : SOURCES.govinfo.keyDocs.includes(doc) ? "US" : "Global"),
-    summary: compactSummary(`${doc.title} (${doc.type}) — curated governance source.`),
-  }));
-
-  const ranked = globalCorpus
+  const ranked = GLOBAL_CORPUS
     .map((item) => {
       const regionBonus = inferredRegion && item.region === inferredRegion ? 2 : 0;
       const score = scoreRelevance(item, queryTokens) + scoreSpecificity(item, query) + regionBonus;
@@ -545,9 +555,9 @@ export function getKeyDocuments(region = "all") {
   if (region === "all") return ALL_KEY_DOCS;
   return ALL_KEY_DOCS.filter(
     (d) =>
-      (region === "EU" && SOURCES.eurlex.keyDocs.includes(d)) ||
-      (region === "US" && SOURCES.govinfo.keyDocs.includes(d)) ||
-      (region === "Global" && SOURCES.oecd.keyDocs.includes(d))
+      (region === "EU" && eurlexDocSet.has(d.url)) ||
+      (region === "US" && govinfoDocSet.has(d.url)) ||
+      (region === "Global" && oecdDocSet.has(d.url))
   );
 }
 

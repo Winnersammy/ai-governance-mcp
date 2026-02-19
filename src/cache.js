@@ -1,4 +1,4 @@
-class LRUCache {
+export class LRUCache {
     constructor(maxEntries = 500, ttl = null) {
         this.maxEntries = maxEntries;
         this.ttl = ttl;
@@ -39,16 +39,3 @@ class LRUCache {
         return this.stats;
     }
 }
-
-// Example Usage:
-const cache = new LRUCache(500, 10000); // 500 max entries, 10 seconds TTL
-cache.set('a', 'some data');
-console.log(cache.get('a')); // returns 'some data'
-console.log(cache.get('b')); // returns null, as 'b' is not in cache
-setTimeout(() => {
-    console.log(cache.get('a')); // returns 'some data' within 10 seconds
-}, 5000);
-setTimeout(() => {
-    console.log(cache.get('a')); // returns null after 10 seconds
-}, 12000);
-console.log(cache.getStats()); // returns cache statistics
