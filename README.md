@@ -28,32 +28,12 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 ## Quick Navigation
 
-**Getting Started**
-- [Hosted Server (no setup needed)](#use-the-hosted-server-no-setup-needed)
-- [Deploy Your Own (one click)](#deploy-your-own-one-click)
-- [Manual Setup](#manual-setup)
-- [Environment Variables](#environment-variables)
-- [npm Scripts](#npm-scripts)
-
-**Platform Integration**
-- [AI Platform Support (with logos)](#ai-platform-support-with-logos)
-- [One-Click Install Prompts](#one-click-install-copy-a-prompt-into-your-ai-tool)
-- [Platform Config Reference](#platform-config-reference)
-
-**Tools & Data**
-- [Available Tools](#available-tools)
-- [Data Sources](#data-sources)
-- [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix-restored--expanded)
-- [Example Prompts](#example-prompts)
-
-**Development & Reference**
-- [Architecture](#architecture)
-- [Adding New Sources](#adding-new-sources)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [FAQ](#frequently-asked-questions)
-- [Feedback Loop](#feedback-loop)
+| | |
+|---|---|
+| **Get Started** | [Hosted Server](#use-the-hosted-server-no-setup-needed) | [Deploy Your Own](#deploy-your-own-one-click) | [Manual Setup](#manual-setup) |
+| **Connect** | [Platform Support](#ai-platform-support-with-logos) | [Config Reference](#platform-config-reference) | [One-Click Install](#one-click-install-copy-a-prompt-into-your-ai-tool) |
+| **Reference** | [Available Tools](#available-tools) | [Regulatory Matrix](#core-regulatory-reference-matrix-restored--expanded) | [Architecture](#architecture) |
+| **Help** | [Troubleshooting](#troubleshooting) | [FAQ](#frequently-asked-questions) | [Contributing](#contributing) |
 
 ### Use the Hosted Server (no setup needed)
 
