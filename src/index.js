@@ -630,6 +630,183 @@ if (port) {
     await transport.handlePostMessage(req, res);
   });
 
+  // Landing page with navigation
+  app.get("/", (req, res) => {
+    res.type("html").send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Governance MCP Server</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a2e; background: #f8f9fc; line-height: 1.6; }
+    a { color: #1f6feb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .header { background: linear-gradient(135deg, #0a2540 0%, #1a1a2e 100%); color: #fff; padding: 3rem 1.5rem 2rem; text-align: center; }
+    .header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .header p { opacity: 0.85; max-width: 600px; margin: 0 auto; }
+    .badge-row { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-green { background: #2ea043; color: #fff; }
+    .badge-blue { background: #1f6feb; color: #fff; }
+    .badge-purple { background: #8250df; color: #fff; }
+    nav { background: #fff; border-bottom: 1px solid #e1e4e8; padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+    nav ul { list-style: none; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+    nav a { font-weight: 500; font-size: 0.9rem; }
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+    section { margin-bottom: 2.5rem; }
+    section h2 { font-size: 1.35rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 2px solid #e1e4e8; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 1.25rem; }
+    .card h3 { font-size: 1rem; margin-bottom: 0.35rem; }
+    .card p { font-size: 0.85rem; color: #555; }
+    .endpoint-table { width: 100%; border-collapse: collapse; }
+    .endpoint-table th, .endpoint-table td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #e1e4e8; }
+    .endpoint-table th { font-size: 0.8rem; text-transform: uppercase; color: #666; }
+    .endpoint-table code { background: #f0f3f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
+    .footer { text-align: center; padding: 2rem 1rem; color: #666; font-size: 0.85rem; border-top: 1px solid #e1e4e8; margin-top: 2rem; }
+    .footer a { color: #1f6feb; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AI Governance MCP Server</h1>
+    <p>Real-time access to AI governance laws, regulations, and policy frameworks from around the world.</p>
+    <div class="badge-row">
+      <span class="badge badge-green">v2.0.0</span>
+      <span class="badge badge-blue">STDIO + SSE</span>
+      <span class="badge badge-purple">MCP Protocol</span>
+    </div>
+  </div>
+
+  <nav>
+    <ul>
+      <li><a href="#endpoints">Endpoints</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#platforms">Platforms</a></li>
+      <li><a href="#sources">Data Sources</a></li>
+      <li><a href="#quickstart">Quick Start</a></li>
+      <li><a href="https://github.com/Samrajtheailyceum/ai-governance-mcp">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <section id="endpoints">
+      <h2>Server Endpoints</h2>
+      <table class="endpoint-table">
+        <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/</code></td><td>This landing page</td></tr>
+          <tr><td><code>GET</code></td><td><code><a href="/sse">/sse</a></code></td><td>SSE endpoint &mdash; connect MCP clients here</td></tr>
+          <tr><td><code>POST</code></td><td><code>/messages</code></td><td>MCP message handler (requires active SSE session)</td></tr>
+          <tr><td><code>GET</code></td><td><code><a href="/health">/health</a></code></td><td>Health check &mdash; returns JSON status</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="tools">
+      <h2>Available Tools</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>search_ai_governance</h3>
+          <p>Full-text search across EU, US, and global governance databases with sustainability focus support.</p>
+        </div>
+        <div class="card">
+          <h3>get_latest_ai_governance_updates</h3>
+          <p>Latest updates from RSS feeds across all regions, with automatic non-RSS fallback.</p>
+        </div>
+        <div class="card">
+          <h3>get_sustainability_ai_regulatory_briefing</h3>
+          <p>Sustainability-focused AI and disclosure regulation briefing with key documents.</p>
+        </div>
+        <div class="card">
+          <h3>get_applied_ai_governance_frameworks</h3>
+          <p>Applies real frameworks to your use case with implementation checklists and links.</p>
+        </div>
+        <div class="card">
+          <h3>get_key_ai_governance_documents</h3>
+          <p>Curated list of landmark AI governance documents by region.</p>
+        </div>
+        <div class="card">
+          <h3>get_eu_ai_act_info</h3>
+          <p>EU AI Act deep dive with risk classification, timeline, and topic search.</p>
+        </div>
+        <div class="card">
+          <h3>get_us_ai_policy</h3>
+          <p>US policy landscape including executive orders, NIST framework, and Federal Register search.</p>
+        </div>
+        <div class="card">
+          <h3>get_global_ai_frameworks</h3>
+          <p>OECD, G7, UN, UNESCO, Bletchley Declaration, and ISO standards overview.</p>
+        </div>
+        <div class="card">
+          <h3>fetch_governance_document</h3>
+          <p>Fetch and extract text from any governance document URL.</p>
+        </div>
+        <div class="card">
+          <h3>compare_ai_governance_frameworks</h3>
+          <p>Side-by-side comparison of frameworks on a specific topic.</p>
+        </div>
+        <div class="card">
+          <h3>submit_mcp_feedback</h3>
+          <p>Submit structured feedback (rating + message) to help improve the server.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="platforms">
+      <h2>Supported Platforms</h2>
+      <table class="endpoint-table">
+        <thead><tr><th>Platform</th><th>Mode</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>ChatGPT / OpenAI</td><td>HTTP/SSE</td><td>Use hosted endpoint or <code>npm run start:sse</code></td></tr>
+          <tr><td>Claude (Desktop / Code)</td><td>stdio or HTTP/SSE</td><td>Great for local stdio integration</td></tr>
+          <tr><td>Gemini</td><td>HTTP/SSE</td><td>Use the public <code>/sse</code> URL</td></tr>
+          <tr><td>GitHub Copilot</td><td>HTTP/SSE</td><td>Connect as remote MCP endpoint</td></tr>
+          <tr><td>Cursor</td><td>stdio</td><td>Configure <code>.cursor/mcp.json</code></td></tr>
+          <tr><td>Windsurf</td><td>stdio</td><td>Configure <code>mcp_config.json</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sources">
+      <h2>Data Sources</h2>
+      <table class="endpoint-table">
+        <thead><tr><th>Region</th><th>Source</th><th>Coverage</th></tr></thead>
+        <tbody>
+          <tr><td>EU</td><td>EUR-Lex API + RSS</td><td>EU AI Act, GDPR, CSRD, CSDDD</td></tr>
+          <tr><td>US</td><td>Federal Register, GovInfo</td><td>Executive orders, agency rules, AI bills</td></tr>
+          <tr><td>Global</td><td>OECD, G7, UNESCO, UN, ISSB</td><td>International frameworks and principles</td></tr>
+          <tr><td>News</td><td>Stanford HAI, AI Now, FLI, ESG Today</td><td>Research, policy, and sustainability news</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <div class="card">
+        <h3>Connect via SSE</h3>
+        <p>Point your MCP client to: <code>${req.protocol}://${req.get("host")}/sse</code></p>
+      </div>
+      <div class="card" style="margin-top: 1rem;">
+        <h3>Health Check</h3>
+        <p>Verify the server is running: <code><a href="/health">${req.protocol}://${req.get("host")}/health</a></code></p>
+      </div>
+      <div class="card" style="margin-top: 1rem;">
+        <h3>Full Documentation</h3>
+        <p>See the <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp">GitHub repository</a> for setup guides, platform configs, and examples.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer">
+    <p>AI Governance MCP Server v2.0.0 &mdash; <a href="https://github.com/Samrajtheailyceum/ai-governance-mcp">GitHub</a> &mdash; <a href="https://theailyceum.com">The AI Lyceum</a> &mdash; <a href="mailto:hello@theailyceum.com">hello@theailyceum.com</a></p>
+  </div>
+</body>
+</html>`);
+  });
+
   // Health check
   app.get("/health", (req, res) => res.json({ status: "ok", server: "ai-governance-mcp", version: "2.0.0" }));
 

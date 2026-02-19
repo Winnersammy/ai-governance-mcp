@@ -28,13 +28,32 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 ## Quick Navigation
 
-- [Hosted Server](#use-the-hosted-server-no-setup-needed)
-- [Deploy Your Own](#deploy-your-own-one-click)
-- [AI Platform Support (with logos)](#ai-platform-support-with-logos)
+**Getting Started**
+- [Hosted Server (no setup needed)](#use-the-hosted-server-no-setup-needed)
+- [Deploy Your Own (one click)](#deploy-your-own-one-click)
 - [Manual Setup](#manual-setup)
+- [Environment Variables](#environment-variables)
+- [npm Scripts](#npm-scripts)
+
+**Platform Integration**
+- [AI Platform Support (with logos)](#ai-platform-support-with-logos)
+- [One-Click Install Prompts](#one-click-install-copy-a-prompt-into-your-ai-tool)
+- [Platform Config Reference](#platform-config-reference)
+
+**Tools & Data**
 - [Available Tools](#available-tools)
+- [Data Sources](#data-sources)
 - [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix-restored--expanded)
-- [Feedback loop](#feedback-loop)
+- [Example Prompts](#example-prompts)
+
+**Development & Reference**
+- [Architecture](#architecture)
+- [Adding New Sources](#adding-new-sources)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [FAQ](#frequently-asked-questions)
+- [Feedback Loop](#feedback-loop)
 
 ### Use the Hosted Server (no setup needed)
 
