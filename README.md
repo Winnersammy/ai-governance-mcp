@@ -542,74 +542,95 @@ ai-governance-mcp/
 
 ```mermaid
 flowchart TB
-    subgraph Clients["AI Clients"]
-        C1["Claude Desktop / Code"]
-        C2["Cursor / Windsurf"]
-        C3["ChatGPT / OpenAI / Gemini"]
-        C4["Any MCP-compatible client"]
+    subgraph L1["LAYER 1 — DATA SOURCES"]
+        direction LR
+        DS1[("1A\nEUR-Lex\nEU: AI Act · GDPR\nCSRD · CSDDD")]
+        DS2[("1B\nFederal Register\n& GovInfo\nUS Regulations")]
+        DS3[("1C\nOECD · UNESCO\nG7 · Bletchley\nGlobal Frameworks")]
+        DS4[("1D\nRSS News Feeds\nStanford HAI · AI Now\nFLI · ESG Today")]
     end
 
-    subgraph Transport["Transport Layer"]
-        T1["StdioServerTransport\n(local · stdio mode)"]
-        T2["SSEServerTransport\n(remote · HTTP mode)"]
+    subgraph L2["LAYER 2 — ACQUISITION  ·  src/fetcher.js"]
+        direction LR
+        AQ1["2A\nEUR-Lex Scraper\nsearchEurLex()"]
+        AQ2["2B\nFederal Register API\nsearchFederalRegister()"]
+        AQ3["2C\nGovInfo API\nsearchGovInfo()"]
+        AQ4["2D\nRSS Parser\nfetchRSSUpdates()"]
     end
 
-    subgraph HTTPServer["Express HTTP Server (SSE mode only)"]
-        H1["CORS Middleware"]
-        H2["/sse — open SSE connection"]
-        H3["/messages — receive tool calls"]
-        H4["/health — status check"]
+    subgraph L3["LAYER 3 — STORAGE  ·  src/cache.js + src/sources.js"]
+        direction LR
+        ST1[("3A\nLRU Cache\n500 entries · 30-min TTL")]
+        ST2["3B\nEmbedded Key Docs\nsources.js\nOffline Fallback"]
     end
 
-    subgraph MCPServer["McpServer (@modelcontextprotocol/sdk)"]
-        subgraph Tools["11 Tool Handlers · src/index.js"]
-            TL1["search_ai_governance"]
-            TL2["get_latest_ai_governance_updates"]
-            TL3["get_sustainability_ai_regulatory_briefing"]
-            TL4["get_applied_ai_governance_frameworks"]
-            TL5["get_key_ai_governance_documents"]
-            TL6["get_eu_ai_act_info"]
-            TL7["get_us_ai_policy"]
-            TL8["get_global_ai_frameworks"]
-            TL9["fetch_governance_document"]
-            TL10["compare_ai_governance_frameworks"]
-            TL11["submit_mcp_feedback"]
-        end
+    subgraph L4["LAYER 4 — MCP TOOL HANDLERS  ·  src/index.js"]
+        direction LR
+        TH1["4A\nsearch_ai_governance"]
+        TH2["4B\nget_latest_ai_governance_updates"]
+        TH3["4C\nget_sustainability_ai_regulatory_briefing"]
+        TH4["4D\nget_applied_ai_governance_frameworks"]
+        TH5["4E\nget_key_ai_governance_documents"]
+        TH6["4F\nget_eu_ai_act_info"]
+        TH7["4G\nget_us_ai_policy"]
+        TH8["4H\nget_global_ai_frameworks"]
+        TH9["4I\nfetch_governance_document"]
+        TH10["4J\ncompare_ai_governance_frameworks"]
+        TH11["4K\nsubmit_mcp_feedback"]
     end
 
-    subgraph DataLayer["Data Layer · src/"]
-        F["fetcher.js\nglobalSearch · searchEurLex · searchFederalRegister\nfetchRSSUpdates · getKeyDocuments\nfetchDocumentContent · getAppliedFrameworkGuidance"]
-        SRC["sources.js\nSOURCES config · ALL_KEY_DOCS · ALL_RSS_FEEDS"]
-        CC["cache.js\nLRU Cache (500 entries · 30-min TTL)"]
+    subgraph L5["LAYER 5 — SERVER  ·  src/index.js"]
+        direction LR
+        SV1["5A\nMcpServer\n@modelcontextprotocol/sdk"]
+        SV2["5B\nStdioServerTransport\nLocal · stdio mode"]
+        SV3["5C\nExpress + SSEServerTransport\n/sse · /messages · /health · CORS"]
     end
 
-    subgraph External["External Data Sources"]
-        E1["EUR-Lex API + RSS\nEU AI Act · GDPR · CSRD · CSDDD"]
-        E2["Federal Register API + RSS\nExecutive Orders · Rules · Notices"]
-        E3["GovInfo API\nUS Bills · Congressional Records"]
-        E4["OECD · UNESCO · G7\nGlobal Frameworks"]
-        E5["News RSS Feeds\nStanford HAI · AI Now · FLI · ESG Today"]
+    subgraph L6["LAYER 6 — AI CLIENTS"]
+        direction LR
+        CL1["6A\nClaude\nDesktop / Code"]
+        CL2["6B\nCursor /\nWindsurf"]
+        CL3["6C\nChatGPT / OpenAI\n/ Gemini / Copilot"]
+        CL4["6D\nAny MCP\nClient"]
     end
 
-    C1 & C2 -->|stdio| T1
-    C3 & C4 -->|HTTP/SSE| T2
+    DS1 --> AQ1
+    DS2 --> AQ2 & AQ3
+    DS3 --> AQ4
+    DS4 --> AQ4
 
-    T1 --> MCPServer
-    T2 --> HTTPServer
-    H1 --> H2 & H3 & H4
-    HTTPServer --> MCPServer
+    AQ1 & AQ2 & AQ3 & AQ4 <-->|read/write| ST1
+    ST2 -.->|offline fallback| AQ1 & AQ2
 
-    MCPServer --> Tools
-    Tools --> F
-    F <-->|"cache read/write"| CC
-    F -->|"reads config"| SRC
-    SRC -.->|"embedded key docs\n(offline fallback)"| F
+    ST1 --> TH1 & TH2 & TH3 & TH4 & TH5 & TH6 & TH7 & TH8 & TH9 & TH10 & TH11
 
-    F -->|"API + RSS"| E1
-    F -->|"API + RSS"| E2
-    F -->|"API"| E3
-    F -->|"RSS"| E4
-    F -->|"RSS"| E5
+    TH1 & TH2 & TH3 & TH4 & TH5 & TH6 & TH7 & TH8 & TH9 & TH10 & TH11 --> SV1
+
+    SV1 --> SV2 & SV3
+
+    SV2 -->|stdio| CL1 & CL2
+    SV3 -->|HTTP/SSE| CL3 & CL4
+
+    classDef datasource fill:#aed6f1,stroke:#2980b9,color:#000
+    classDef acquisition fill:#a9dfbf,stroke:#27ae60,color:#000
+    classDef storage fill:#a9dfbf,stroke:#27ae60,color:#000
+    classDef tool fill:#a9dfbf,stroke:#27ae60,color:#000
+    classDef server fill:#f9c8a3,stroke:#e67e22,color:#000
+    classDef client fill:#f9c8a3,stroke:#e67e22,color:#000
+
+    class DS1,DS2,DS3,DS4 datasource
+    class AQ1,AQ2,AQ3,AQ4 acquisition
+    class ST1,ST2 storage
+    class TH1,TH2,TH3,TH4,TH5,TH6,TH7,TH8,TH9,TH10,TH11 tool
+    class SV1,SV2,SV3 server
+    class CL1,CL2,CL3,CL4 client
+
+    style L1 fill:#d6eaf8,stroke:#2980b9,color:#000
+    style L2 fill:#d5f5e3,stroke:#27ae60,color:#000
+    style L3 fill:#d5f5e3,stroke:#27ae60,color:#000
+    style L4 fill:#d5f5e3,stroke:#27ae60,color:#000
+    style L5 fill:#fde8d8,stroke:#e67e22,color:#000
+    style L6 fill:#fde8d8,stroke:#e67e22,color:#000
 ```
 
 ### How It Works
