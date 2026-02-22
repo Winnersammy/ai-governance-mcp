@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/index.js",
     "start:sse": "PORT=3100 node src/index.js",
+    "install:local": "bash scripts/install.sh",
     "test": "node test/client.js",
     "test:terminal": "bash scripts/terminal-smoke.sh"
   },
@@ -26,12 +27,15 @@
     "connector"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "axios": "^1.7.9",
     "cheerio": "^1.0.0",
     "express": "^5.2.1",
-    "node-html-parser": "^7.0.2",
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "zod": "^4.3.6"
   }
 }

@@ -1,24 +1,26 @@
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit';
 
 // Configure limits using environment variables
-const rateLimitPerIP = process.env.RATE_LIMIT_PER_IP || 100; // requests per IP
-const rateLimitPerSession = process.env.RATE_LIMIT_PER_SESSION || 50; // requests per session
+function parseEnvInt(value, defaultValue) {
+  const parsed = parseInt(value, 10);
+  if (isNaN(parsed)) {
+    if (value !== undefined) console.warn(`[rateLimiter] Invalid value "${value}", using default ${defaultValue}`);
+    return defaultValue;
+  }
+  return parsed;
+}
 
-// Rate Limiter for per-IP
-const limiterPerIP = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: rateLimitPerIP, // limit each IP to the specified number
-    message: 'Too many requests from this IP, please try again later.'
+const rateLimitPerIP = parseEnvInt(process.env.RATE_LIMIT_PER_IP, 100);
+const rateLimitPerSession = parseEnvInt(process.env.RATE_LIMIT_PER_SESSION, 50);
+
+export const limiterPerIP = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: rateLimitPerIP,
+  message: 'Too many requests from this IP, please try again later.',
 });
 
-// Rate Limiter for per-Session
-const sessionLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: rateLimitPerSession, // limit each session to the specified number
-    message: 'Too many requests from this session, please try again later.'
+export const sessionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: rateLimitPerSession,
+  message: 'Too many requests from this session, please try again later.',
 });
-
-module.exports = {
-    limiterPerIP,
-    sessionLimiter
-};

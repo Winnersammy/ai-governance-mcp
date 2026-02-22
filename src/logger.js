@@ -1,33 +1,25 @@
-const fs = require('fs');
-const path = require('path');
+import { createWriteStream, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const logFilePath = path.join(__dirname, 'logs.json');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const logsDir = join(__dirname, '..', 'logs');
+mkdirSync(logsDir, { recursive: true });
+const logFilePath = join(logsDir, 'server.log');
+const stream = createWriteStream(logFilePath, { flags: 'a' });
+stream.on('error', (err) => console.error('[logger] Log write failed:', err));
+process.on('beforeExit', () => stream.end());
 
-const levels = {
-    ERROR: 'ERROR',
-    WARN: 'WARN',
-    INFO: 'INFO',
-    DEBUG: 'DEBUG'
-};
-
-function getTimestamp() {
-    return new Date().toISOString();
-}
+const levels = { ERROR: 'ERROR', WARN: 'WARN', INFO: 'INFO', DEBUG: 'DEBUG' };
 
 function log(level, message, context = {}) {
-    const logEntry = {
-        level,
-        message,
-        timestamp: getTimestamp(),
-        context
-    };
-
-    fs.appendFileSync(logFilePath, JSON.stringify(logEntry) + '\n');
+  const entry = { level, message, timestamp: new Date().toISOString(), context };
+  stream.write(JSON.stringify(entry) + '\n');
 }
 
-module.exports = {
-    error: (message, context) => log(levels.ERROR, message, context),
-    warn: (message, context) => log(levels.WARN, message, context),
-    info: (message, context) => log(levels.INFO, message, context),
-    debug: (message, context) => log(levels.DEBUG, message, context)
+export default {
+  error: (message, context) => log(levels.ERROR, message, context),
+  warn: (message, context) => log(levels.WARN, message, context),
+  info: (message, context) => log(levels.INFO, message, context),
+  debug: (message, context) => log(levels.DEBUG, message, context),
 };
