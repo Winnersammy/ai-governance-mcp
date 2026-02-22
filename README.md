@@ -59,6 +59,36 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 ## 🚀 Getting Started
 
+### ⚡ One-Command Install (macOS / Linux)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Samrajtheailyceum/ai-governance-mcp/main/scripts/install.sh)
+```
+
+This script:
+- Checks Node.js 18+, npm, and git are installed
+- Clones the repo to `~/ai-governance-mcp` (or uses an existing clone)
+- Runs `npm install`
+- Runs the smoke test to confirm the server is healthy
+- Prints ready-to-paste config snippets for Claude Desktop, Claude Code, Cursor, Windsurf, and HTTP/SSE mode
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--mode stdio` | Install then launch server in stdio mode |
+| `--mode sse` | Install then launch server in HTTP/SSE mode on port 3100 |
+| `--mode skip` | Install only, don't start the server (default) |
+| `--dir <path>` | Install to a custom directory (default: `~/ai-governance-mcp`) |
+| `--no-test` | Skip the post-install smoke test |
+
+Example — install and immediately start in SSE mode:
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Samrajtheailyceum/ai-governance-mcp/main/scripts/install.sh) --mode sse
+```
+
+---
+
 ### Option 1: Use the Hosted Server (no setup needed)
 
 A public demo server may be available — check the latest endpoint in [Releases](https://github.com/Samrajtheailyceum/ai-governance-mcp/releases) or the [Discussions](https://github.com/Samrajtheailyceum/ai-governance-mcp/discussions) tab, as hosted URLs can change. The most recently published endpoint:
@@ -432,6 +462,7 @@ PORT=8080 node src/index.js
 
 | Script | Command | What It Does |
 |--------|---------|-------------|
+| `npm run install:local` | `bash scripts/install.sh` | Full local installer with prereq checks, smoke test, and config snippets |
 | `npm start` | `node src/index.js` | Start in stdio mode (for MCP clients) |
 | `npm run start:sse` | `PORT=3100 node src/index.js` | Start in HTTP/SSE mode on port 3100 |
 | `npm test` | `node test/client.js` | Run the full test suite against live APIs |
@@ -528,6 +559,7 @@ ai-governance-mcp/
 ├── test/
 │   └── client.js          — End-to-end test suite (27 checks, works offline)
 ├── scripts/
+│   ├── install.sh         — One-command installer (prereq checks, clone, npm install, smoke test, config snippets)
 │   └── terminal-smoke.sh  — HTTP health-check smoke test
 ├── Dockerfile             — Docker deployment config
 ├── render.yaml            — Render.com one-click deploy config

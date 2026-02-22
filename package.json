@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/index.js",
     "start:sse": "PORT=3100 node src/index.js",
+    "install:local": "bash scripts/install.sh",
     "test": "node test/client.js",
     "test:terminal": "bash scripts/terminal-smoke.sh"
   },
