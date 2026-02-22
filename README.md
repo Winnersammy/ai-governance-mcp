@@ -30,19 +30,26 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 - [Hosted Server](#use-the-hosted-server-no-setup-needed)
 - [Deploy Your Own](#deploy-your-own-one-click)
-- [AI Platform Support (with logos)](#ai-platform-support-with-logos)
+- [AI Platform Support](#ai-platform-support-with-logos)
 - [Manual Setup](#manual-setup)
 - [Available Tools](#available-tools)
-- [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix-restored--expanded)
-- [Feedback loop](#feedback-loop)
+- [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix)
+- [Data Sources](#data-sources)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [FAQ](#frequently-asked-questions)
+- [License](#license)
 
 ### Use the Hosted Server (no setup needed)
 
-Connect any MCP-compatible client to the live public server:
+A public demo server may be available — check the latest endpoint in [Releases](https://github.com/Samrajtheailyceum/ai-governance-mcp/releases) or the [Discussions](https://github.com/Samrajtheailyceum/ai-governance-mcp/discussions) tab, as hosted URLs can change. The most recently published endpoint:
 
 ```
 https://billing-connecting-aquatic-performs.trycloudflare.com/sse
 ```
+
+> **Note:** This is an ephemeral Cloudflare tunnel URL and may be offline. For a stable endpoint, [deploy your own instance](#deploy-your-own-one-click).
 
 Health check: `https://billing-connecting-aquatic-performs.trycloudflare.com/health`
 
@@ -67,24 +74,10 @@ For any questions or tailored AI governance support, email **hello@theailyceum.c
 
 ## Repository Quality & Governance
 
-## Maintainer GitHub Update Workflow
-
-For maintainers publishing updates to GitHub:
-
-```bash
-git add .
-git commit -m "Describe your change"
-git push origin <branch>
-```
-
-If you use this repo with automated agents, ensure each change includes:
-- updated docs (when behavior changes),
-- test evidence (`npm test`, `npm run test:terminal`),
-- a clear PR summary of motivation + implementation + validation.
-
 This repository includes:
 - **Contributor workflow:** see [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - **Version history:** see [`CHANGELOG.md`](CHANGELOG.md)
+- **Security policy:** see [`SECURITY.md`](SECURITY.md)
 - **Operational smoke check:** `npm run test:terminal`
 
 Design goals for this MCP:
@@ -469,7 +462,7 @@ If live sources are unavailable or a question is out-of-scope for current retrie
 | Global | OECD, G7, UNESCO, UN, ISSB | International frameworks and principles |
 | News | Stanford HAI, AI Now, FLI, ESG Today | Research, policy, and sustainability news |
 
-## Core Regulatory Reference Matrix (restored + expanded)
+## Core Regulatory Reference Matrix
 
 | Reference | Region | Why it matters | Link |
 |-----------|--------|----------------|------|

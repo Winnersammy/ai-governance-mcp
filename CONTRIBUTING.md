@@ -50,6 +50,26 @@ If you add or change tools/features, update:
 - `src/sources.js` source/reference matrix if source coverage changed
 - `CHANGELOG.md`
 
+## Maintainer release workflow
+
+For maintainers publishing updates to GitHub:
+
+```bash
+git checkout -b feature/my-change
+# ... make changes ...
+npm test
+npm run test:terminal
+git add .
+git commit -m "feat: describe your change"
+git push origin feature/my-change
+# Open a PR — include motivation, behavior changes, and test evidence
+```
+
+If you use this repo with automated agents, ensure each change includes:
+- updated docs (when behavior changes),
+- test evidence (`npm test`, `npm run test:terminal`),
+- a clear PR summary of motivation + implementation + validation.
+
 ## Release checklist
 
 1. Update README and changelog.
