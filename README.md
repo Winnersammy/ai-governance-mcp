@@ -538,91 +538,72 @@ ai-governance-mcp/
 └── package.json       — Dependencies and scripts
 ```
 
-### System Architecture Diagram
+### System Architecture Diagram (L1 — System Context)
 
 ```mermaid
 flowchart TB
     subgraph L1["LAYER 1 — DATA SOURCES"]
         direction LR
-        DS1[("1A\nEUR-Lex\nEU: AI Act · GDPR\nCSRD · CSDDD")]
+        DS1[("1A\nEUR-Lex\nEU Regulations")]
         DS2[("1B\nFederal Register\n& GovInfo\nUS Regulations")]
-        DS3[("1C\nOECD · UNESCO\nG7 · Bletchley\nGlobal Frameworks")]
-        DS4[("1D\nRSS News Feeds\nStanford HAI · AI Now\nFLI · ESG Today")]
+        DS3[("1C\nOECD · UNESCO · G7\nGlobal Frameworks")]
+        DS4[("1D\nRSS News Feeds\nAI & Sustainability News")]
     end
 
-    subgraph L2["LAYER 2 — ACQUISITION  ·  src/fetcher.js"]
+    subgraph L2["LAYER 2 — DATA ACQUISITION"]
         direction LR
-        AQ1["2A\nEUR-Lex Scraper\nsearchEurLex()"]
-        AQ2["2B\nFederal Register API\nsearchFederalRegister()"]
-        AQ3["2C\nGovInfo API\nsearchGovInfo()"]
-        AQ4["2D\nRSS Parser\nfetchRSSUpdates()"]
+        AQ["2\nData Fetcher\nAPI · Scraper · RSS Parser"]
     end
 
-    subgraph L3["LAYER 3 — STORAGE  ·  src/cache.js + src/sources.js"]
+    subgraph L3["LAYER 3 — STORAGE"]
         direction LR
-        ST1[("3A\nLRU Cache\n500 entries · 30-min TTL")]
-        ST2["3B\nEmbedded Key Docs\nsources.js\nOffline Fallback"]
+        ST1[("3A\nIn-Memory Cache\n30-min TTL")]
+        ST2[("3B\nEmbedded Key Docs\nOffline Fallback")]
     end
 
-    subgraph L4["LAYER 4 — MCP TOOL HANDLERS  ·  src/index.js"]
+    subgraph L4["LAYER 4 — MCP SERVER"]
         direction LR
-        TH1["4A\nsearch_ai_governance"]
-        TH2["4B\nget_latest_ai_governance_updates"]
-        TH3["4C\nget_sustainability_ai_regulatory_briefing"]
-        TH4["4D\nget_applied_ai_governance_frameworks"]
-        TH5["4E\nget_key_ai_governance_documents"]
-        TH6["4F\nget_eu_ai_act_info"]
-        TH7["4G\nget_us_ai_policy"]
-        TH8["4H\nget_global_ai_frameworks"]
-        TH9["4I\nfetch_governance_document"]
-        TH10["4J\ncompare_ai_governance_frameworks"]
-        TH11["4K\nsubmit_mcp_feedback"]
+        MCP["4\nAI Governance MCP Server\n11 Governance Tools"]
     end
 
-    subgraph L5["LAYER 5 — SERVER  ·  src/index.js"]
+    subgraph L5["LAYER 5 — TRANSPORT"]
         direction LR
-        SV1["5A\nMcpServer\n@modelcontextprotocol/sdk"]
-        SV2["5B\nStdioServerTransport\nLocal · stdio mode"]
-        SV3["5C\nExpress + SSEServerTransport\n/sse · /messages · /health · CORS"]
+        TR1["5A\nStdio Transport\nLocal Mode"]
+        TR2["5B\nHTTP / SSE Transport\nRemote Mode"]
     end
 
     subgraph L6["LAYER 6 — AI CLIENTS"]
         direction LR
         CL1["6A\nClaude\nDesktop / Code"]
         CL2["6B\nCursor /\nWindsurf"]
-        CL3["6C\nChatGPT / OpenAI\n/ Gemini / Copilot"]
-        CL4["6D\nAny MCP\nClient"]
+        CL3["6C\nChatGPT / OpenAI /\nGemini / Copilot"]
+        CL4["6D\nAny MCP-Compatible\nClient"]
     end
 
-    DS1 --> AQ1
-    DS2 --> AQ2 & AQ3
-    DS3 --> AQ4
-    DS4 --> AQ4
+    DS1 & DS2 & DS3 & DS4 -->|fetch| AQ
 
-    AQ1 & AQ2 & AQ3 & AQ4 <-->|read/write| ST1
-    ST2 -.->|offline fallback| AQ1 & AQ2
+    AQ <-->|cache read/write| ST1
+    ST2 -.->|offline fallback| AQ
 
-    ST1 --> TH1 & TH2 & TH3 & TH4 & TH5 & TH6 & TH7 & TH8 & TH9 & TH10 & TH11
+    AQ --> MCP
 
-    TH1 & TH2 & TH3 & TH4 & TH5 & TH6 & TH7 & TH8 & TH9 & TH10 & TH11 --> SV1
+    MCP --> TR1 & TR2
 
-    SV1 --> SV2 & SV3
-
-    SV2 -->|stdio| CL1 & CL2
-    SV3 -->|HTTP/SSE| CL3 & CL4
+    TR1 -->|stdio| CL1 & CL2
+    TR2 -->|HTTP/SSE| CL3 & CL4
 
     classDef datasource fill:#aed6f1,stroke:#2980b9,color:#000
     classDef acquisition fill:#a9dfbf,stroke:#27ae60,color:#000
     classDef storage fill:#a9dfbf,stroke:#27ae60,color:#000
-    classDef tool fill:#a9dfbf,stroke:#27ae60,color:#000
-    classDef server fill:#f9c8a3,stroke:#e67e22,color:#000
+    classDef server fill:#a9dfbf,stroke:#27ae60,color:#000
+    classDef transport fill:#f9c8a3,stroke:#e67e22,color:#000
     classDef client fill:#f9c8a3,stroke:#e67e22,color:#000
 
     class DS1,DS2,DS3,DS4 datasource
-    class AQ1,AQ2,AQ3,AQ4 acquisition
+    class AQ acquisition
     class ST1,ST2 storage
-    class TH1,TH2,TH3,TH4,TH5,TH6,TH7,TH8,TH9,TH10,TH11 tool
-    class SV1,SV2,SV3 server
+    class MCP server
+    class TR1,TR2 transport
     class CL1,CL2,CL3,CL4 client
 
     style L1 fill:#d6eaf8,stroke:#2980b9,color:#000
