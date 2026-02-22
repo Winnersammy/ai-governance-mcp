@@ -77,7 +77,7 @@ Health check: `https://billing-connecting-aquatic-performs.trycloudflare.com/hea
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Samrajtheailyceum/ai-governance-mcp)
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/new?repo=https://github.com/Samrajtheailyceum/ai-governance-mcp)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https://github.com/Samrajtheailyceum/ai-governance-mcp)
 
 After deploying, your server URL will be something like:
 ```
