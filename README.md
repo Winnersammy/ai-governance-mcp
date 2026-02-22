@@ -26,22 +26,40 @@ Compatible with **Claude, ChatGPT, Gemini, Copilot, Cursor, Windsurf**, and any 
 
 **GitHub:** `https://github.com/Samrajtheailyceum/ai-governance-mcp`
 
+---
+
 ## Quick Navigation
 
-- [Hosted Server](#use-the-hosted-server-no-setup-needed)
-- [Deploy Your Own](#deploy-your-own-one-click)
-- [AI Platform Support](#ai-platform-support-with-logos)
-- [Manual Setup](#manual-setup)
-- [Available Tools](#available-tools)
-- [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix)
-- [Data Sources](#data-sources)
-- [Architecture](#architecture)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [FAQ](#frequently-asked-questions)
-- [License](#license)
+- [🚀 Getting Started](#-getting-started)
+  - [Hosted Server (no setup)](#option-1-use-the-hosted-server-no-setup-needed)
+  - [Deploy Your Own (one click)](#option-2-deploy-your-own-one-click)
+  - [Manual Setup](#option-3-manual-setup-local)
+  - [One-Click AI-Assisted Install](#one-click-ai-assisted-install)
+- [⚙️ Configuration](#️-configuration)
+  - [AI Platform Support](#ai-platform-support)
+  - [Platform Config Reference](#platform-config-reference)
+  - [Environment Variables](#environment-variables)
+  - [npm Scripts](#npm-scripts)
+- [🛠️ Available Tools](#️-available-tools)
+- [📚 Reference](#-reference)
+  - [Data Sources](#data-sources)
+  - [Core Regulatory Reference Matrix](#core-regulatory-reference-matrix)
+  - [Example Prompts](#example-prompts)
+  - [Feedback Loop](#feedback-loop)
+- [🏗️ Architecture](#️-architecture)
+- [🧪 Testing](#-testing)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [🤝 Contributing](#-contributing)
+- [🔒 Repository Quality & Governance](#-repository-quality--governance)
+- [❓ FAQ](#-frequently-asked-questions)
+- [📬 Contact & Consulting](#-questions--ai-governance-consulting)
+- [📄 License](#-license)
 
-### Use the Hosted Server (no setup needed)
+---
+
+## 🚀 Getting Started
+
+### Option 1: Use the Hosted Server (no setup needed)
 
 A public demo server may be available — check the latest endpoint in [Releases](https://github.com/Samrajtheailyceum/ai-governance-mcp/releases) or the [Discussions](https://github.com/Samrajtheailyceum/ai-governance-mcp/discussions) tab, as hosted URLs can change. The most recently published endpoint:
 
@@ -49,11 +67,13 @@ A public demo server may be available — check the latest endpoint in [Releases
 https://billing-connecting-aquatic-performs.trycloudflare.com/sse
 ```
 
-> **Note:** This is an ephemeral Cloudflare tunnel URL and may be offline. For a stable endpoint, [deploy your own instance](#deploy-your-own-one-click).
+> **Note:** This is an ephemeral Cloudflare tunnel URL and may be offline. For a stable endpoint, [deploy your own instance](#option-2-deploy-your-own-one-click).
 
 Health check: `https://billing-connecting-aquatic-performs.trycloudflare.com/health`
 
-### Deploy Your Own (one click)
+---
+
+### Option 2: Deploy Your Own (one click)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Samrajtheailyceum/ai-governance-mcp)
 
@@ -67,170 +87,15 @@ Use that URL as your MCP server endpoint on any platform.
 
 ---
 
-## Questions / AI Governance Consulting
+### Option 3: Manual Setup (local)
 
-For any questions or tailored AI governance support, email **hello@theailyceum.com** or visit **https://theailyceum.com**.
-
-
-## Repository Quality & Governance
-
-This repository includes:
-- **Contributor workflow:** see [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- **Version history:** see [`CHANGELOG.md`](CHANGELOG.md)
-- **Security policy:** see [`SECURITY.md`](SECURITY.md)
-- **Operational smoke check:** `npm run test:terminal`
-
-Design goals for this MCP:
-1. High-signal governance answers with source links and jurisdiction context
-2. Graceful fallback behavior when live endpoints are blocked/rate-limited
-3. Practical implementation guidance (not just policy summaries)
-
-## AI Platform Support (with logos)
-
-| Platform | Logo | Typical MCP Mode | Notes |
-|----------|------|------------------|-------|
-| ChatGPT / OpenAI | ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white) | HTTP/SSE | Use hosted endpoint or `npm run start:sse`. |
-| Claude (Desktop / Code) | ![Claude](https://img.shields.io/badge/Claude-D97757?style=flat-square&logo=anthropic&logoColor=white) | stdio or HTTP/SSE | Great for local stdio integration. |
-| Gemini | ![Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white) | HTTP/SSE | Use the public `/sse` URL for remote connectors. |
-| GitHub Copilot | ![Copilot](https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=githubcopilot&logoColor=white) | HTTP/SSE | Connect as remote MCP endpoint. |
-| Cursor | ![Cursor](https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white) | stdio | Configure `.cursor/mcp.json`. |
-| Windsurf | ![Windsurf](https://img.shields.io/badge/Windsurf-0EA5E9?style=flat-square&logo=codeium&logoColor=white) | stdio | Configure `mcp_config.json`. |
-
-## One-Click Install: Copy a Prompt Into Your AI Tool
-
-Don't want to configure anything manually? Just **copy the prompt for your platform below** and paste it into your AI assistant. It will handle the installation for you.
-
-### For Claude Code (CLI)
-
-> Paste this into Claude Code:
-
-```
-Install the AI Governance MCP server from https://github.com/Samrajtheailyceum/ai-governance-mcp for me.
-
-Steps:
-1. Clone the repo: git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
-2. Run: cd ~/ai-governance-mcp && npm install
-3. Add the MCP server: claude mcp add ai-governance node ~/ai-governance-mcp/src/index.js
-4. Confirm it's added by running: claude mcp list
-```
-
-### For Cursor (with AI chat)
-
-> Paste this into Cursor's AI chat:
-
-```
-Help me install the AI Governance MCP server. Here's what to do:
-
-1. Open a terminal and run:
-   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
-   cd ~/ai-governance-mcp && npm install
-
-2. Then add this to my MCP config file (.cursor/mcp.json):
-   {
-     "mcpServers": {
-       "ai-governance": {
-         "command": "node",
-         "args": ["~/ai-governance-mcp/src/index.js"]
-       }
-     }
-   }
-
-3. Tell me to restart Cursor to activate it.
-```
-
-### For Windsurf (with AI chat)
-
-> Paste this into Windsurf's AI chat:
-
-```
-Help me install the AI Governance MCP server. Here's what to do:
-
-1. Open a terminal and run:
-   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
-   cd ~/ai-governance-mcp && npm install
-
-2. Then add this to my Windsurf MCP config (~/.codeium/windsurf/mcp_config.json):
-   {
-     "mcpServers": {
-       "ai-governance": {
-         "command": "node",
-         "args": ["~/ai-governance-mcp/src/index.js"]
-       }
-     }
-   }
-
-3. Tell me to restart Windsurf to activate it.
-```
-
-### For ChatGPT / OpenAI (needs hosted server)
-
-> Paste this into ChatGPT or any OpenAI-powered tool:
-
-```
-I want to connect to the AI Governance MCP server.
-
-The server repo is at: https://github.com/Samrajtheailyceum/ai-governance-mcp
-
-To use it with OpenAI, I need to:
-1. Clone and install: git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git && cd ai-governance-mcp && npm install
-2. Start in HTTP/SSE mode: npm run start:sse
-3. The server will be available at: http://localhost:3100/sse
-4. For production, deploy to Railway/Render and use the public URL as the MCP endpoint.
-
-Help me set this up step by step.
-```
-
-### For Claude Desktop (manual config)
-
-> Paste this into Claude Desktop or Claude Code to get help setting it up:
-
-```
-Help me add the AI Governance MCP server to my Claude Desktop config.
-
-1. First clone and install:
-   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
-   cd ~/ai-governance-mcp && npm install
-
-2. Then edit my claude_desktop_config.json and add this to the mcpServers section:
-   "ai-governance": {
-     "command": "node",
-     "args": ["/Users/YOUR_USERNAME/ai-governance-mcp/src/index.js"]
-   }
-
-Config location:
-- macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-- Windows: %APPDATA%\Claude\claude_desktop_config.json
-
-3. Remind me to restart Claude Desktop after.
-```
-
-### For Any Other MCP-Compatible Platform
-
-> Generic prompt you can paste into any AI assistant:
-
-```
-I want to install the AI Governance MCP server from https://github.com/Samrajtheailyceum/ai-governance-mcp
-
-It's a standard MCP server that runs over stdio (default) or HTTP/SSE (with PORT env var).
-
-Please help me:
-1. Clone the repo and run npm install
-2. Configure it for whatever MCP client/platform I'm using
-3. The entry point is src/index.js
-4. For HTTP/SSE mode, run with PORT=3100 and connect to http://localhost:3100/sse
-```
-
----
-
-## Manual Setup
-
-### Prerequisites
+#### Prerequisites
 
 - **Node.js 18+** (check with `node --version`)
 - **npm** (comes with Node)
 - **git** (to clone the repo)
 
-### Step 1: Clone and Install
+#### Step 1: Clone and Install
 
 ```bash
 git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git
@@ -238,7 +103,7 @@ cd ai-governance-mcp
 npm install
 ```
 
-### Step 2: Verify It Works
+#### Step 2: Verify It Works
 
 ```bash
 # Run the test suite (passes with or without internet — offline fallback built-in)
@@ -254,7 +119,7 @@ kill %1
 npm run test:terminal
 ```
 
-### OpenAI / ChatGPT Terminal Test Flow
+#### OpenAI / ChatGPT Terminal Test Flow
 
 If you are testing from an OpenAI-compatible terminal workflow, use this minimal sequence:
 
@@ -276,7 +141,7 @@ Then in your MCP client, run prompts like:
 
 If live sources are blocked/rate-limited, the server now returns a limits-aware response with trusted generic regulatory URLs so users still get actionable resources.
 
-### Step 3: Choose Your Mode
+#### Step 3: Choose Your Mode
 
 **Option A: Local (stdio)** — for Claude Desktop, Claude Code, Cursor, Windsurf
 
@@ -310,7 +175,238 @@ Deploy to any hosting provider (Railway, Render, Fly.io, etc.) and use that URL 
 
 ---
 
-## Environment Variables
+### One-Click AI-Assisted Install
+
+Don't want to configure anything manually? Just **copy the prompt for your platform below** and paste it into your AI assistant. It will handle the installation for you.
+
+#### For Claude Code (CLI)
+
+> Paste this into Claude Code:
+
+```
+Install the AI Governance MCP server from https://github.com/Samrajtheailyceum/ai-governance-mcp for me.
+
+Steps:
+1. Clone the repo: git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
+2. Run: cd ~/ai-governance-mcp && npm install
+3. Add the MCP server: claude mcp add ai-governance node ~/ai-governance-mcp/src/index.js
+4. Confirm it's added by running: claude mcp list
+```
+
+#### For Cursor (with AI chat)
+
+> Paste this into Cursor's AI chat:
+
+```
+Help me install the AI Governance MCP server. Here's what to do:
+
+1. Open a terminal and run:
+   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then add this to my MCP config file (.cursor/mcp.json):
+   {
+     "mcpServers": {
+       "ai-governance": {
+         "command": "node",
+         "args": ["~/ai-governance-mcp/src/index.js"]
+       }
+     }
+   }
+
+3. Tell me to restart Cursor to activate it.
+```
+
+#### For Windsurf (with AI chat)
+
+> Paste this into Windsurf's AI chat:
+
+```
+Help me install the AI Governance MCP server. Here's what to do:
+
+1. Open a terminal and run:
+   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then add this to my Windsurf MCP config (~/.codeium/windsurf/mcp_config.json):
+   {
+     "mcpServers": {
+       "ai-governance": {
+         "command": "node",
+         "args": ["~/ai-governance-mcp/src/index.js"]
+       }
+     }
+   }
+
+3. Tell me to restart Windsurf to activate it.
+```
+
+#### For ChatGPT / OpenAI (needs hosted server)
+
+> Paste this into ChatGPT or any OpenAI-powered tool:
+
+```
+I want to connect to the AI Governance MCP server.
+
+The server repo is at: https://github.com/Samrajtheailyceum/ai-governance-mcp
+
+To use it with OpenAI, I need to:
+1. Clone and install: git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git && cd ai-governance-mcp && npm install
+2. Start in HTTP/SSE mode: npm run start:sse
+3. The server will be available at: http://localhost:3100/sse
+4. For production, deploy to Railway/Render and use the public URL as the MCP endpoint.
+
+Help me set this up step by step.
+```
+
+#### For Claude Desktop (manual config)
+
+> Paste this into Claude Desktop or Claude Code to get help setting it up:
+
+```
+Help me add the AI Governance MCP server to my Claude Desktop config.
+
+1. First clone and install:
+   git clone https://github.com/Samrajtheailyceum/ai-governance-mcp.git ~/ai-governance-mcp
+   cd ~/ai-governance-mcp && npm install
+
+2. Then edit my claude_desktop_config.json and add this to the mcpServers section:
+   "ai-governance": {
+     "command": "node",
+     "args": ["/Users/YOUR_USERNAME/ai-governance-mcp/src/index.js"]
+   }
+
+Config location:
+- macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+- Windows: %APPDATA%\Claude\claude_desktop_config.json
+
+3. Remind me to restart Claude Desktop after.
+```
+
+#### For Any Other MCP-Compatible Platform
+
+> Generic prompt you can paste into any AI assistant:
+
+```
+I want to install the AI Governance MCP server from https://github.com/Samrajtheailyceum/ai-governance-mcp
+
+It's a standard MCP server that runs over stdio (default) or HTTP/SSE (with PORT env var).
+
+Please help me:
+1. Clone the repo and run npm install
+2. Configure it for whatever MCP client/platform I'm using
+3. The entry point is src/index.js
+4. For HTTP/SSE mode, run with PORT=3100 and connect to http://localhost:3100/sse
+```
+
+---
+
+## ⚙️ Configuration
+
+### AI Platform Support
+
+| Platform | Logo | Typical MCP Mode | Notes |
+|----------|------|------------------|-------|
+| ChatGPT / OpenAI | ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white) | HTTP/SSE | Use hosted endpoint or `npm run start:sse`. |
+| Claude (Desktop / Code) | ![Claude](https://img.shields.io/badge/Claude-D97757?style=flat-square&logo=anthropic&logoColor=white) | stdio or HTTP/SSE | Great for local stdio integration. |
+| Gemini | ![Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white) | HTTP/SSE | Use the public `/sse` URL for remote connectors. |
+| GitHub Copilot | ![Copilot](https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=githubcopilot&logoColor=white) | HTTP/SSE | Connect as remote MCP endpoint. |
+| Cursor | ![Cursor](https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white) | stdio | Configure `.cursor/mcp.json`. |
+| Windsurf | ![Windsurf](https://img.shields.io/badge/Windsurf-0EA5E9?style=flat-square&logo=codeium&logoColor=white) | stdio | Configure `mcp_config.json`. |
+
+---
+
+### Platform Config Reference
+
+#### Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ai-governance": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
+    }
+  }
+}
+```
+
+Config file locations:
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Important:** Restart Claude Desktop after editing the config.
+
+#### Claude Code (CLI)
+
+```bash
+claude mcp add ai-governance node /absolute/path/to/ai-governance-mcp/src/index.js
+```
+
+#### Cursor
+
+Add to `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
+
+```json
+{
+  "mcpServers": {
+    "ai-governance": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
+    }
+  }
+}
+```
+
+#### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ai-governance": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
+    }
+  }
+}
+```
+
+#### OpenAI / ChatGPT / Assistants API
+
+Start the server in HTTP/SSE mode:
+
+```bash
+npm run start:sse
+# or: PORT=3100 node src/index.js
+```
+
+MCP server endpoint:
+```
+http://localhost:3100/sse
+```
+
+For production, deploy the server and use the deployed URL.
+
+#### Any MCP-Compatible Client
+
+**stdio mode** (default):
+```bash
+node /absolute/path/to/ai-governance-mcp/src/index.js
+```
+
+**HTTP/SSE mode**:
+```bash
+PORT=3100 node /absolute/path/to/ai-governance-mcp/src/index.js
+```
+Connect to `http://localhost:3100/sse` using the MCP SSE transport.
+
+---
+
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -332,7 +428,7 @@ PORT=8080 node src/index.js
 
 ---
 
-## npm Scripts
+### npm Scripts
 
 | Script | Command | What It Does |
 |--------|---------|-------------|
@@ -343,97 +439,7 @@ PORT=8080 node src/index.js
 
 ---
 
-## Platform Config Reference
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "ai-governance": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
-    }
-  }
-}
-```
-
-Config file locations:
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-**Important:** Restart Claude Desktop after editing the config.
-
-### Claude Code (CLI)
-
-```bash
-claude mcp add ai-governance node /absolute/path/to/ai-governance-mcp/src/index.js
-```
-
-### Cursor
-
-Add to `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
-
-```json
-{
-  "mcpServers": {
-    "ai-governance": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
-    }
-  }
-}
-```
-
-### Windsurf
-
-Add to `~/.codeium/windsurf/mcp_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "ai-governance": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-governance-mcp/src/index.js"]
-    }
-  }
-}
-```
-
-### OpenAI / ChatGPT / Assistants API
-
-Start the server in HTTP/SSE mode:
-
-```bash
-npm run start:sse
-# or: PORT=3100 node src/index.js
-```
-
-MCP server endpoint:
-```
-http://localhost:3100/sse
-```
-
-For production, deploy the server and use the deployed URL.
-
-### Any MCP-Compatible Client
-
-**stdio mode** (default):
-```bash
-node /absolute/path/to/ai-governance-mcp/src/index.js
-```
-
-**HTTP/SSE mode**:
-```bash
-PORT=3100 node /absolute/path/to/ai-governance-mcp/src/index.js
-```
-Connect to `http://localhost:3100/sse` using the MCP SSE transport.
-
----
-
-## Available Tools
+## 🛠️ Available Tools
 
 | Tool | Description |
 |------|-------------|
@@ -453,7 +459,11 @@ Most user-facing tools now include a **Response Protocol (Professional)** prefac
 
 If live sources are unavailable or a question is out-of-scope for current retrievable data, the MCP now returns a clear **limitations notice** plus trusted **generic resource URLs** (OECD, EUR-Lex, Federal Register, NIST, UNESCO, IFRS) so users still get actionable next steps.
 
-## Data Sources
+---
+
+## 📚 Reference
+
+### Data Sources
 
 | Region | Source | What's Covered |
 |--------|--------|----------------|
@@ -462,7 +472,9 @@ If live sources are unavailable or a question is out-of-scope for current retrie
 | Global | OECD, G7, UNESCO, UN, ISSB | International frameworks and principles |
 | News | Stanford HAI, AI Now, FLI, ESG Today | Research, policy, and sustainability news |
 
-## Core Regulatory Reference Matrix
+---
+
+### Core Regulatory Reference Matrix
 
 | Reference | Region | Why it matters | Link |
 |-----------|--------|----------------|------|
@@ -477,7 +489,9 @@ If live sources are unavailable or a question is out-of-scope for current retrie
 | UNESCO AI Ethics Recommendation | Global | Human-rights and ethics guardrails for AI policy and deployment | https://unesdoc.unesco.org/ark:/48223/pf0000381137 |
 | ISSB IFRS S1/S2 | Global | Sustainability disclosure standards used in cross-border governance | https://www.ifrs.org/issued-standards/ifrs-sustainability-standards-navigator/ |
 
-## Example Prompts
+---
+
+### Example Prompts
 
 Once connected to any AI assistant, you can ask:
 
@@ -488,35 +502,16 @@ Once connected to any AI assistant, you can ask:
 - *"Fetch the NIST AI Risk Management Framework"*
 - *"What US executive orders on AI are currently active?"*
 
-## Feedback loop
+---
+
+### Feedback Loop
 
 The MCP can collect user feedback through `submit_mcp_feedback` (rating + context + message).
 This helps maintainers improve future versions, but does **not** auto-train the model in real-time.
 
-## Testing
-
-```bash
-# Full test suite — tests v2.0 data fetchers against live APIs (with offline fallback)
-npm test
-```
-
-The test suite checks:
-1. Source configuration (key docs, RSS feeds, regions)
-2. Key document retrieval (EU, US, Global)
-3. Federal Register API search
-4. EUR-Lex search
-5. RSS feed aggregation
-6. Global combined search (all sources)
-7. Document content fetching (scrapes a live URL)
-8. Global framework ranking and retrieval quality
-9. A 20-prompt reliability sweep across sustainability + AI governance topics
-10. Applied framework guidance includes context, implementation steps, and resource links
-
-Internet access improves results, but **all 27 tests pass even offline** — the server's built-in offline cache and fallback sources ensure the suite always completes successfully. Network errors will appear in the output when live APIs are unreachable; these are expected and handled.
-
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 ai-governance-mcp/
@@ -631,7 +626,7 @@ All API responses are cached in-memory for 30 minutes. The cache is per-process 
 
 ---
 
-## Adding New Sources
+### Adding New Sources
 
 1. **Add the source config** in `src/sources.js`:
 
@@ -678,7 +673,30 @@ export async function searchMySource(query, maxResults = 10) {
 
 ---
 
-## Troubleshooting
+## 🧪 Testing
+
+```bash
+# Full test suite — tests v2.0 data fetchers against live APIs (with offline fallback)
+npm test
+```
+
+The test suite checks:
+1. Source configuration (key docs, RSS feeds, regions)
+2. Key document retrieval (EU, US, Global)
+3. Federal Register API search
+4. EUR-Lex search
+5. RSS feed aggregation
+6. Global combined search (all sources)
+7. Document content fetching (scrapes a live URL)
+8. Global framework ranking and retrieval quality
+9. A 20-prompt reliability sweep across sustainability + AI governance topics
+10. Applied framework guidance includes context, implementation steps, and resource links
+
+Internet access improves results, but **all 27 tests pass even offline** — the server's built-in offline cache and fallback sources ensure the suite always completes successfully. Network errors will appear in the output when live APIs are unreachable; these are expected and handled.
+
+---
+
+## 🔧 Troubleshooting
 
 ### "Cannot find module" or npm install fails
 
@@ -730,7 +748,7 @@ docker build --no-cache -t ai-governance-mcp .
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions welcome! Here's how:
 
@@ -749,7 +767,22 @@ Contributions welcome! Here's how:
 
 ---
 
-## Frequently Asked Questions
+## 🔒 Repository Quality & Governance
+
+This repository includes:
+- **Contributor workflow:** see [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Version history:** see [`CHANGELOG.md`](CHANGELOG.md)
+- **Security policy:** see [`SECURITY.md`](SECURITY.md)
+- **Operational smoke check:** `npm run test:terminal`
+
+Design goals for this MCP:
+1. High-signal governance answers with source links and jurisdiction context
+2. Graceful fallback behavior when live endpoints are blocked/rate-limited
+3. Practical implementation guidance (not just policy summaries)
+
+---
+
+## ❓ Frequently Asked Questions
 
 **Q: Does this cost anything?**
 A: No. The server is free and open source. All data sources (EUR-Lex, Federal Register, OECD, RSS feeds) are free public APIs.
@@ -768,6 +801,12 @@ A: See [Adding New Sources](#adding-new-sources) above. Add the API/RSS config t
 
 ---
 
-## License
+## 📬 Questions / AI Governance Consulting
+
+For any questions or tailored AI governance support, email **hello@theailyceum.com** or visit **https://theailyceum.com**.
+
+---
+
+## 📄 License
 
 MIT
